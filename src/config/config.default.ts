@@ -17,5 +17,11 @@ export default (appInfo: EggAppInfo) => {
     replaceEggLogger: true,
   };
 
+  config.wx = {};
+  // 微信号 gh_fc15edc014ed
+  config.wx.appID = 'wxf75b896ff7ce2b22';
+  config.wx.appsecret = '953256d7d102830735d12eb12985f9cf';
+  config.wx.token = 'token';
+
   return config;
 };

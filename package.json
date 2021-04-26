@@ -12,6 +12,9 @@
     "egg-scripts": "^2.10.0"
   },
   "devDependencies": {
+    "sha1": "^1.1.1",
+    "xml2js": "^0.4.17",
+    "localtunnel": "^2.0.1",
     "@midwayjs/cli": "^1.0.0",
     "@midwayjs/egg-ts-helper": "^1.0.1",
     "@midwayjs/luckyeye": "^1.0.0",
@@ -32,6 +35,7 @@
     "stop": "egg-scripts stop --title=my-midway-project",
     "start_build": "npm run build && cross-env NODE_ENV=development midway-bin dev",
     "dev": "cross-env ets && cross-env NODE_ENV=local midway-bin dev --ts",
+    "lt": "lt --subdomain cc01 --port 7001",
     "test": "midway-bin test --ts",
     "cov": "midway-bin cov --ts",
     "lint": "mwts check",
