@@ -28,3 +28,5 @@ $ npm stop
 
 
 [midway]: https://midwayjs.org
+
+[wx登录]('https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxf75b896ff7ce2b22&redirect_uri=https://cc01.loca.lt/api/login&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect';)

@@ -1,6 +1,8 @@
 import { EggAppConfig, EggAppInfo, PowerPartial } from 'egg';
+const Bmob = require('hydrogen-js-sdk');
 
 export type DefaultConfig = PowerPartial<EggAppConfig>;
+Bmob.initialize('876e14873ff14d80', '112233');
 
 export default (appInfo: EggAppInfo) => {
   const config = {} as DefaultConfig;
