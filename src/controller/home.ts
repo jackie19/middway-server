@@ -24,9 +24,9 @@ export class HomeController {
     @Query() signature,
     @Query() nonce,
     @Query() timestamp,
-    @Query() echostr
+    @Query() echostr,
+    @Query() token,
   ) {
-    const token = this.wx.token;
     const str = [token, timestamp, nonce].sort().join('');
     const sha = sha1(str);
 
