@@ -25,7 +25,6 @@ export class APIController {
 
   @Get('/get_user')
   async getUser(@Query() uid: string, @Queries() q) {
-    console.log(q, '====');
     const user = await this.userService.getUser({ uid });
     return { success: true, message: 'OK', data: user };
   }
