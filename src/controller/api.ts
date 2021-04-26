@@ -52,4 +52,13 @@ export class APIController {
       };
     }
   }
+
+  @Get('/banner')
+  async banner() {
+    return [
+      {
+        img: '/public/banner-1.jpg',
+      },
+    ];
+  }
 }
