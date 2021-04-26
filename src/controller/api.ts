@@ -45,7 +45,6 @@ export class APIController {
   @Get('/save/user')
   async saveUser(@Query(ALL) query) {
     const findUser = await this.dbService.getUser(query.openid);
-    console.log(findUser);
     if (Array.isArray(findUser.data) && findUser.data.length === 0) {
       return await this.dbService.saveUser(query);
     } else {
