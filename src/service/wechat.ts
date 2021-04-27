@@ -110,9 +110,9 @@ export class WechatService {
   }
   //把数组转为对象
   async formatMessage(result) {
-    function has(obj, key) {
-      return Object.prototype.hasOwnProperty.call(obj, key);
-    }
+    // function has(obj, key) {
+    //   return Object.prototype.hasOwnProperty.call(obj, key);
+    // }
     const message = {};
     if (typeof result === 'object') {
       for (const key in result) {
