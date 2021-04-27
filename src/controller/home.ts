@@ -25,12 +25,12 @@ export class HomeController {
     @Query() nonce,
     @Query() timestamp,
     @Query() echostr,
-    @Query() token,
+    @Query() token
   ) {
     const str = [token, timestamp, nonce].sort().join('');
     const sha = sha1(str);
 
-    console.log(sha, echostr, '微信验证配置=============');
+    console.log(sha === signature, echostr, '微信验证配置=============');
     return echostr + '';
   }
 }
