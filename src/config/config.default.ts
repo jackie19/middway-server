@@ -18,12 +18,17 @@ export default (appInfo: EggAppInfo) => {
     // false 或者为空代表使用 egg-logger
     replaceEggLogger: true,
   };
+  // todo https://eggjs.org/zh-cn/core/security.html
+  config.security = {
+    csrf: {
+      enable: false,
+    },
+  };
 
   config.wx = {};
   // 微信号 gh_fc15edc014ed
   config.wx.appID = 'wxf75b896ff7ce2b22';
   config.wx.appsecret = '953256d7d102830735d12eb12985f9cf';
-  config.wx.token = 'token';
 
   return config;
 };

@@ -21,6 +21,6 @@
 
 ### 端口占用
 ```
-netstat -nao | findstr 8019
-taskkill /pid 7452 /f
+netstat -nao | findstr 7001
+taskkill /pid 26956 /f
 ```

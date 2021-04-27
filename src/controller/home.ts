@@ -2,12 +2,14 @@ import {
   Controller,
   Inject,
   Get,
+  Post,
   Provide,
   Config,
   Query,
 } from '@midwayjs/decorator';
 import { Context } from 'egg';
-// eslint-disable-next-line node/no-unpublished-require
+import { WechatService } from '../service/wechat';
+
 const sha1 = require('sha1');
 
 @Provide()
@@ -19,7 +21,10 @@ export class HomeController {
   @Inject()
   ctx: Context;
 
-  @Get('/')
+  @Inject()
+  wechatService: WechatService;
+
+  @Get('/wechat')
   async home(
     @Query() signature,
     @Query() nonce,
@@ -32,5 +37,12 @@ export class HomeController {
 
     console.log(sha === signature, echostr, '微信验证配置=============');
     return echostr + '';
+  }
+
+  @Post('/wechat')
+  async index() {
+    const xml = await this.wechatService.message();
+    console.log('post / ', xml);
+    return xml;
   }
 }

@@ -10,7 +10,11 @@
     "@midwayjs/web": "^2.3.0",
     "egg": "^2.0.0",
     "egg-scripts": "^2.10.0",
-    "hydrogen-js-sdk": "^2.2.4"
+    "ejs": "^3.1.3",
+    "hydrogen-js-sdk": "^2.2.4",
+    "raw-body": "^2.4.1",
+    "sha1": "^1.1.1",
+    "xml2js": "^0.4.23"
   },
   "devDependencies": {
     "@midwayjs/cli": "^1.0.0",
@@ -23,10 +27,8 @@
     "jest": "^26.4.0",
     "localtunnel": "^2.0.1",
     "mwts": "^1.0.5",
-    "sha1": "^1.1.1",
     "ts-jest": "^26.2.0",
-    "typescript": "^4.0.0",
-    "xml2js": "^0.4.17"
+    "typescript": "^4.0.0"
   },
   "engines": {
     "node": ">=12.0.0"
@@ -36,7 +38,7 @@
     "stop": "egg-scripts stop --title=my-midway-project",
     "start_build": "npm run build && cross-env NODE_ENV=development midway-bin dev",
     "dev": "cross-env ets && cross-env NODE_ENV=local midway-bin dev --ts",
-    "lt": "lt --subdomain cc01 --port 7001",
+    "lt": "lt --subdomain cc01 --port 7002",
     "test": "midway-bin test --ts",
     "cov": "midway-bin cov --ts",
     "lint": "mwts check",
