@@ -12,7 +12,10 @@ export class DbService {
 
   async saveUser(options) {
     const query = Bmob.Query('users');
-    query.set('nickname', options.nickname);
+    query.set('nickname', JSON.stringify(options.nickname));
+    query.set('city', options.city);
+    query.set('province', options.province);
+    query.set('headimgurl', options.headimgurl);
     query.set('openid', options.openid);
     const res = await query.save();
 

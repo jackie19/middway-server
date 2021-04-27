@@ -17,3 +17,10 @@
 ### midway
 - [midway指南](https://www.bookstack.cn/read/midwayjs-202006/spilt.7.5d2ca741e8ea6d97.md)
 - [eggjs](https://eggjs.org/zh-cn/basics/schedule.html)
+
+
+### 端口占用
+```
+netstat -nao | findstr 8019
+taskkill /pid 7452 /f
+```

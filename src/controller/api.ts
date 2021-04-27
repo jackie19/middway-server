@@ -4,7 +4,6 @@ import {
   Get,
   Provide,
   Query,
-  Queries,
   ALL,
 } from '@midwayjs/decorator';
 import { Context } from 'egg';
@@ -24,9 +23,14 @@ export class APIController {
   dbService: DbService;
 
   @Get('/get_user')
-  async getUser(@Query() uid: string, @Queries() q) {
+  async getUser(@Query() uid: string) {
     const user = await this.userService.getUser({ uid });
     return { success: true, message: 'OK', data: user };
+  }
+
+  async hasOpenidInDb(openid) {
+    const findUser = await this.dbService.getUser(openid);
+    return !(Array.isArray(findUser.data) && findUser.data.length === 0);
   }
 
   @Get('/login')
@@ -38,17 +42,30 @@ export class APIController {
       data.data.openid
     );
 
-    return { data: userinfo.data };
+    if (userinfo.data.openid) {
+      const alreadyHave = await this.hasOpenidInDb(userinfo.data.openid);
+      if (!alreadyHave) {
+        await this.dbService.saveUser(userinfo.data);
+      }
+    }
+    if (!userinfo.data.openid) {
+      return {
+        code: userinfo.data.errcode,
+        message: userinfo.data.errmsg,
+      };
+    }
+    return { code: 200, data: userinfo.data };
   }
 
   @Get('/save/user')
   async saveUser(@Query(ALL) query) {
-    const findUser = await this.dbService.getUser(query.openid);
-    if (Array.isArray(findUser.data) && findUser.data.length === 0) {
+    const alreadyHave = await this.hasOpenidInDb(query.openid);
+    if (!alreadyHave) {
       return await this.dbService.saveUser(query);
     } else {
       return {
-        data: findUser.data[0],
+        code: 200,
+        message: '',
       };
     }
   }
