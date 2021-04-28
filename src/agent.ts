@@ -14,7 +14,7 @@ class Agent {
   // 所有的配置已经加载完毕
   // 可以用来加载应用自定义的文件，启动自定义的服务
   async didLoad() {
-    await cache.init(this.getAccessToken);
+    await cache.init(this.getAccessToken.bind(this));
     let data = {
       access_token: '',
       ticket: '',
@@ -53,7 +53,7 @@ class Agent {
       'access_token',
       data.access_token,
       (data.expires_in - 20) * 1000,
-      this.getAccessToken
+      this.getAccessToken.bind(this)
     );
 
     return data;
@@ -69,7 +69,7 @@ class Agent {
       'ticket',
       res.data.ticket,
       (res.data.expires_in - 20) * 1000,
-      this.getTicket
+      this.getTicket.bind(this)
     );
     return res;
   }
