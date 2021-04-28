@@ -3,7 +3,7 @@ import { Application } from 'egg';
 import { WechatService } from '../service/wechat';
 
 @Provide()
-@Controller('/wx')
+@Controller('/api/wechat')
 export class MenuController {
   @App()
   app: Application;

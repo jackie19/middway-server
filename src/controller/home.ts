@@ -13,7 +13,7 @@ import { WechatService } from '../service/wechat';
 const sha1 = require('sha1');
 
 @Provide()
-@Controller('/')
+@Controller('/api/wechat')
 export class HomeController {
   @Config('wx')
   wx;
@@ -24,7 +24,7 @@ export class HomeController {
   @Inject()
   wechatService: WechatService;
 
-  @Get('/wechat')
+  @Get('/index')
   async home(
     @Query() signature,
     @Query() nonce,
@@ -39,7 +39,7 @@ export class HomeController {
     return echostr + '';
   }
 
-  @Post('/wechat')
+  @Post('/index')
   async index() {
     const xml = await this.wechatService.message();
     console.log('post / ', xml);

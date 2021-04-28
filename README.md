@@ -29,4 +29,13 @@ $ npm stop
 
 [midway]: https://midwayjs.org
 
-[wx登录]('https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxf75b896ff7ce2b22&redirect_uri=https://cc01.loca.lt/api/login&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect';)
+### feature
+
+- 微信后台接入接口 GET /api/wechat/index
+- 微信消息接口 POST /api/wechat/index
+- 微信菜单创建接口 GET /api/wechat/menu
+- web登录获取openid GET /api/wechat/login
+- 取用户信息 GET /api/user
+- 保存用户信息 POST /api/user
+- banner GET /api/banner
+

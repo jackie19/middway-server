@@ -2,6 +2,8 @@ import {
   Inject,
   Controller,
   Get,
+  Post,
+  Body,
   Provide,
   Query,
   ALL,
@@ -22,7 +24,7 @@ export class APIController {
   @Inject()
   dbService: DbService;
 
-  @Get('/get_user')
+  @Get('/user')
   async getUser(@Query() uid: string) {
     const user = await this.userService.getUser({ uid });
     return { success: true, message: 'OK', data: user };
@@ -33,7 +35,7 @@ export class APIController {
     return !(Array.isArray(findUser.data) && findUser.data.length === 0);
   }
 
-  @Get('/login')
+  @Get('/wechat/login')
   async login(@Query(ALL) query) {
     const data = await this.userService.webToken(query.code);
 
@@ -57,8 +59,8 @@ export class APIController {
     return { code: 200, data: userinfo.data };
   }
 
-  @Get('/save/user')
-  async saveUser(@Query(ALL) query) {
+  @Post('/user')
+  async saveUser(@Body(ALL) query) {
     const alreadyHave = await this.hasOpenidInDb(query.openid);
     if (!alreadyHave) {
       return await this.dbService.saveUser(query);
