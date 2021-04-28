@@ -29,9 +29,7 @@ class Agent {
     };
 
     this.app.messenger.on('egg-ready', () => {
-      this.app.messenger.sendToApp('update.access_token', {
-        access_token: data.access_token,
-      });
+      this.app.messenger.sendToApp('update.access_token', data);
     });
     console.log(data, 'app did load');
   }

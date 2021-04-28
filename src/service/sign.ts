@@ -1,19 +1,19 @@
 import { Provide, App, Config, Inject } from '@midwayjs/decorator';
 import { Application, Context } from 'egg';
 
-const crypto = require('crypto');
+const sha2 = require('sha1');
 
 /**
  * 生成签名的时间戳
- * @return {字符串}
+ * @return {string}
  */
 function createTimestamp() {
-  return new Date().getTime() / 1000;
+  return new Date().getTime().toString();
 }
 
 /**
  * 生成签名的随机串
- * @return {字符串}
+ * @return {string}
  */
 function createNonceStr() {
   return Math.random().toString(36).substr(2, 15);
@@ -21,8 +21,8 @@ function createNonceStr() {
 
 /**
  * 对参数对象进行字典排序
- * @param  {对象} args 签名所需参数对象
- * @return {字符串}    排序后生成字符串
+ * @param  {object} args 签名所需参数对象
+ * @return {string}    排序后生成字符串
  */
 function raw(args) {
   let keys = Object.keys(args);
@@ -38,14 +38,6 @@ function raw(args) {
   }
   string = string.substr(1);
   return string;
-}
-
-// sha1加密
-function sha1(str) {
-  const shasum = crypto.createHash('sha1');
-  shasum.update(str);
-  str = shasum.digest('hex');
-  return str;
 }
 
 @Provide()
@@ -64,15 +56,16 @@ export class SignService {
 
   async getSign(params) {
     const ret = {
-      jsapi_ticket: params.ticket,
+      jsapi_ticket: this.app.config.ticket,
       nonceStr: createNonceStr(),
-      timestamp: createTimestamp().toString(),
-      url: params.url,
+      timestamp: createTimestamp(),
+      url: this.domain + params.path,
     } as any;
 
     const string = raw(ret);
-    ret.signature = sha1(string);
+    ret.signature = sha2(string);
     ret.appId = this.wx.appID;
-    console.log('ret', ret);
+    ret.jsapi_ticket = undefined;
+    return ret;
   }
 }

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <script src="https://res2.wx.qq.com/open/js/jweixin-1.6.0.js"></script>
+</head>
+<body>
+
+<script>
+  fetch('/api/wechat/jssdk/sign?path=/public/sdk.html').then(res => {
+    res.json().then(data => {
+      const config = Object.assign({
+        debug: true,
+        appId: '',
+        timestamp: '',
+        nonceStr: '',
+        signature: '',
+        jsApiList: ['updateTimelineShareData', 'updateAppMessageShareData'] // 必填，需要使用的JS接口列表
+      }, data)
+      wx.config(config);
+
+      wx.ready(function () {
+        console.log(config)
+      });
+    })
+  })
+</script>
+</body>
+</html>

@@ -11,6 +11,7 @@ import {
 import { Context } from 'egg';
 import { UserService } from '../service/user';
 import { DbService } from '../service/db';
+import { SignService } from '../service/sign';
 
 @Provide()
 @Controller('/api')
@@ -23,6 +24,9 @@ export class APIController {
 
   @Inject()
   dbService: DbService;
+
+  @Inject()
+  signService: SignService;
 
   @Get('/user')
   async getUser(@Query() uid: string) {
@@ -82,11 +86,9 @@ export class APIController {
   }
 
   @Get('/wechat/jssdk/sign')
-  async jssdk() {
-    return [
-      {
-        img: '/public/banner-1.jpg',
-      },
-    ];
+  async jssdk(@Query('path') path) {
+    return await this.signService.getSign({
+      path,
+    });
   }
 }

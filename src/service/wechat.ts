@@ -22,16 +22,6 @@ export class WechatService {
   @Config('domain')
   domain;
 
-  async updateAccessToken() {
-    const appID = this.wx.appID;
-    const appsecret = this.wx.appsecret;
-    const url = api.accessToken + '&appid=' + appID + '&secret=' + appsecret;
-
-    const body = await this.app.curl(url, { dataType: 'json' });
-
-    return body.data;
-  }
-
   async clearMenu() {
     const url =
       api.menu.delete + 'access_token=' + this.app.config.access_token;
