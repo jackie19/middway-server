@@ -1,6 +1,13 @@
 module.exports = app => {
-  app.messenger.on('update.access_token', data => {
-    app.config.access_token = data.access_token;
-    app.config.ticket = data.ticket;
+  app.messenger.on('access_token', data => {
+    app.config.access_token = data;
+    console.log('app: access_token update', data);
+  });
+  app.messenger.on('ticket', data => {
+    app.config.ticket = data;
+    console.log('app: ticket update', data);
+  });
+  app.messenger.on('test', data => {
+    console.log('app: test update', data);
   });
 };

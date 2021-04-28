@@ -6,41 +6,33 @@ import api from './lib/wechatApi';
 class Agent {
   app = null;
   constructor(app) {
-    // app.messenger.on('egg-ready', () => {
-    //   app.messenger.sendToApp('xxx_action', { data: 1 });
-    // });
     this.app = app;
   }
   // 所有的配置已经加载完毕
   // 可以用来加载应用自定义的文件，启动自定义的服务
   async didLoad() {
-    await cache.init(this.getAccessToken.bind(this));
-    let data = {
-      access_token: '',
-      ticket: '',
-    };
+    await cache.init(this.queen.bind(this));
 
-    data = await this.getAccessToken();
-    const ticket = await this.getTicket();
-
-    data = {
-      ...data,
-      ticket: ticket.data.ticket,
-    };
-
-    this.app.messenger.on('egg-ready', () => {
-      this.app.messenger.sendToApp('update.access_token', data);
+    this.app.messenger.on('egg-ready', async () => {
+      await this.queen();
     });
-    console.log(data, 'app did load');
+  }
+
+  async queen() {
+    await this.getAccessToken();
+    await this.getTicket();
+  }
+
+  sendToApp(key, data) {
+    this.app.messenger.sendToApp(key, data);
   }
 
   async getAccessToken() {
     const access_token = cache.get('access_token');
 
     if (access_token) {
-      return {
-        access_token,
-      };
+      this.sendToApp('access_token', access_token);
+      return access_token;
     }
 
     const appID = this.app.config.wx.appID;
@@ -48,6 +40,7 @@ class Agent {
     const api = wechatApi.accessToken;
     const url = api + '&appid=' + appID + '&secret=' + appsecret;
     const { data } = await this.app.curl(url, { dataType: 'json' });
+    this.sendToApp('access_token', data.access_token);
 
     cache.put(
       'access_token',
@@ -56,10 +49,16 @@ class Agent {
       this.getAccessToken.bind(this)
     );
 
-    return data;
+    return data.access_token;
   }
 
   async getTicket() {
+    const ticket = cache.get('ticket');
+    if (ticket) {
+      this.sendToApp('ticket', ticket);
+      return ticket;
+    }
+
     const url = api.getticket + cache.get('access_token');
     const res = await this.app.curl(url, { dataType: 'json' });
     if (res.data.errcode !== 0 || res.data.errmsg !== 'ok') {
@@ -71,7 +70,9 @@ class Agent {
       (res.data.expires_in - 20) * 1000,
       this.getTicket.bind(this)
     );
-    return res;
+    this.sendToApp('ticket', res.data.ticket);
+
+    return res.data.ticket;
   }
 }
 
