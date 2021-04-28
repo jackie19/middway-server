@@ -80,4 +80,13 @@ export class APIController {
       },
     ];
   }
+
+  @Get('/wechat/jssdk/sign')
+  async jssdk() {
+    return [
+      {
+        img: '/public/banner-1.jpg',
+      },
+    ];
+  }
 }

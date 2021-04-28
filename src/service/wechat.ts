@@ -35,7 +35,6 @@ export class WechatService {
   async clearMenu() {
     const url =
       api.menu.delete + 'access_token=' + this.app.config.access_token;
-    console.log(this.app.config.access_token, ' ===================');
     const res = await this.app.curl(url, { dataType: 'json' });
     if (res.data.errcode === 0) {
       return res;

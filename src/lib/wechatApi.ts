@@ -9,6 +9,7 @@ export default {
   uploadPermOther: prefix + 'material/add_material?', //access_token=ACCESS_TOKEN  上传永久其他素材
   getPermMaterial: prefix + 'material/get_material?', //access_token=ACCESS_TOKEN 获取永久素材，POST请求
   delPermMaterial: prefix + 'material/del_material?', //access_token=ACCESS_TOKEN 删除永久素材，POST请求
+  getticket: prefix + 'ticket/getticket?type=jsapi&&access_token=', // access_token=ACCESS_TOKEN&type=jsapi, GET, 获得jsapi_ticket
   menu: {
     create: prefix + 'menu/create?', //access_token=ACCESS_TOKEN  创建菜单
     get: prefix + 'menu/get?', //access_token=ACCESS_TOKE  获取菜单,GET请求
