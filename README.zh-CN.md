@@ -3,6 +3,7 @@
 [midway]: https://midwayjs.org
 
 ### 公众号教程
+- [测试号](https://mp.weixin.qq.com/debug/cgi-bin/sandboxinfo?action=showinfo&t=sandbox/index)
 - [接入](https://segmentfault.com/a/1190000008979327)
 - [自动回复](https://segmentfault.com/a/1190000008991937)
 - [消息相应](https://segmentfault.com/a/1190000009001473)
@@ -12,7 +13,7 @@
 - [用户管理](https://segmentfault.com/a/1190000009063792)
 - [群发消息](https://segmentfault.com/a/1190000009077668)
 - [推送](https://segmentfault.com/a/1190000009093331)
-
+- [jssdk签名](https://blog.csdn.net/qq_26003101/article/details/90732596)
 
 ### midway
 - [midway指南](https://www.bookstack.cn/read/midwayjs-202006/spilt.7.5d2ca741e8ea6d97.md)

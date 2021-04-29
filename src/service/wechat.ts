@@ -78,7 +78,7 @@ export class WechatService {
         return await this.toLink({
           title: '欢迎',
           desc: '热烈欢迎',
-          url: `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${this.wx.appID}&redirect_uri=${this.domain}/api/login&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect`,
+          url: `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${this.wx.appID}&redirect_uri=${this.domain}/api/wechat/login&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect`,
           FromUserName: formatted.FromUserName,
           ToUserName: formatted.ToUserName,
           picUrl: this.domain + '/public/banner-1.jpg',
