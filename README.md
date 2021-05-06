@@ -40,4 +40,5 @@ $ npm stop
 - 取用户信息 GET /api/user
 - 保存用户信息 POST /api/user
 - banner GET /api/banner
+- oss 文件上传签名
 
