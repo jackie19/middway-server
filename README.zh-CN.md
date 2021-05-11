@@ -18,6 +18,7 @@
 ### midway
 - [midway指南](https://www.bookstack.cn/read/midwayjs-202006/spilt.7.5d2ca741e8ea6d97.md)
 - [eggjs](https://eggjs.org/zh-cn/basics/schedule.html)
+- [ORM](https://www.yuque.com/midwayjs/faas/component_orm)
 
 
 ### 端口占用

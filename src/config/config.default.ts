@@ -11,7 +11,7 @@ export default (appInfo: EggAppInfo) => {
   config.keys = appInfo.name + '_1619428819813_8505';
 
   // add your config here
-  config.middleware = [];
+  config.middleware = ['ctrlMiddleware'];
 
   config.midwayFeature = {
     // true 代表使用 midway logger
@@ -26,6 +26,13 @@ export default (appInfo: EggAppInfo) => {
   };
 
   config.wx = {};
+
+  // 全局路由前缀
+  config.routerPrefix = '/dxp';
+
+  config.midwayFeature = {
+    replaceEggLogger: true,
+  };
 
   return config;
 };

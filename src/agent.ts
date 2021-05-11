@@ -1,7 +1,6 @@
 // agent.js
 import wechatApi from './lib/wechatApi';
 import cache from './lib/cache';
-import api from './lib/wechatApi';
 
 class Agent {
   app = null;
@@ -59,7 +58,7 @@ class Agent {
       return ticket;
     }
 
-    const url = api.getticket + cache.get('access_token');
+    const url = wechatApi.getticket + cache.get('access_token');
     const res = await this.app.curl(url, { dataType: 'json' });
     if (res.data.errcode !== 0 || res.data.errmsg !== 'ok') {
       throw new Error(res.data.errcode + ' ' + res.data.errmsg);
