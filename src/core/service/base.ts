@@ -14,7 +14,7 @@ export class BaseService {
   sqlParams = [];
 
   setModel(entity) {
-    this.entity = entity as Repository<any>;
+    this.entity = entity;
   }
 
   // 设置请求上下文

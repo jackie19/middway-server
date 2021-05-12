@@ -18,7 +18,7 @@ import { Application } from 'egg';
 import { join } from 'path';
 import { BaseService } from './core/service/base';
 import { BaseController } from './core/controller/base';
-import { EntityValid } from './core/entity/entity.valid';
+import { validate } from './core/entity.validator/';
 
 @Configuration({
   imports: [orm],
@@ -164,7 +164,7 @@ export class ContainerLifeCycle extends BaseController implements ILifeCycle {
     // 获得校验规则
     const rules = getClassMetadata(RULES_KEY, modelClass);
 
-    const result = EntityValid.validate(rules, params);
+    const result = validate(rules, params);
     if (!result.success) {
       throw new Error(result.error.messages);
     }

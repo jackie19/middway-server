@@ -2,10 +2,10 @@
 const fs = require('fs');
 const path = require('path');
 const mkdirp = require('mkdirp');
-const wechatFilePath = path.join(process.cwd(), './config/wechat.txt');
+const wechatFilePath = path.join(process.cwd(), './cache/cache.txt');
 
 const readFileAsync = function (filePath, options) {
-  return new Promise((resolve, reject) => {
+  return new Promise(resolve => {
     fs.readFile(filePath, options, (err, content) => {
       if (err) {
         resolve('""');

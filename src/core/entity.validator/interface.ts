@@ -27,4 +27,4 @@ export interface RuleItem {
   [propName: string]: any;
 }
 
-export type Rules = RuleItem[];
+export type IRules = RuleItem[];
