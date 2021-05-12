@@ -1,7 +1,8 @@
 import { EntityModel } from '@midwayjs/orm';
-import { Column } from 'typeorm';
+import { Column, ManyToOne } from 'typeorm';
 import { BaseEntity } from '../core/entity/base';
 import { EntityValidator, Rules } from '../core/entity.validator';
+import { DemoAppMemEntity } from './member';
 
 /**
  * 商品
@@ -33,4 +34,9 @@ export class DemoAppGoodsEntity extends BaseEntity {
 
   @Column({ comment: '分类', type: 'tinyint' })
   type: number;
+
+  @ManyToOne(() => DemoAppMemEntity, member => member.goods, {
+    cascade: true,
+  })
+  member: DemoAppMemEntity;
 }

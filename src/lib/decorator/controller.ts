@@ -45,7 +45,7 @@ interface IQueryOption {
   orderBy?: IOrderBy;
   leftJoin?: LeftJoinOption[];
 }
-interface ICurdOptions {
+interface ICrudOptions extends AnyObject {
   api: APIS[];
   entity: any;
   queryOption?: IQueryOption;
@@ -54,7 +54,7 @@ interface ICurdOptions {
 export function IController(
   prefix = '/',
   routerOptions = { middleware: [], sensitive: true },
-  curdOptions: ICurdOptions
+  crudOptions: ICrudOptions
 ) {
   return target => {
     saveModule(CONTROLLER_KEY, target);
@@ -63,7 +63,7 @@ export function IController(
       {
         prefix,
         routerOptions,
-        curdOptions,
+        crudOptions,
       },
       target
     );

@@ -9,12 +9,12 @@ export class BaseService {
   @App()
   app: Application;
 
-  entity: Repository<any>;
+  entityModel: Repository<any>;
   ctx = null;
   sqlParams = [];
 
-  setModel(entity) {
-    this.entity = entity;
+  setEntityModel(entityModel) {
+    this.entityModel = entityModel;
   }
 
   // 设置请求上下文
@@ -32,11 +32,21 @@ export class BaseService {
     this.sqlParams = [];
   }
 
-  async add(param) {
-    if (!this.entity) {
+  async add(param, { entity, add }) {
+    if (!this.entityModel) {
       throw new Error(ERRINFO.NOENTITY);
     }
-    await this.entity.save(param);
+
+    const myEntity = new entity();
+    for (const key in param) {
+      myEntity[key] = param[key];
+    }
+
+    if (add) {
+      add(param, myEntity);
+    }
+
+    await this.entityModel.save(myEntity);
     return {
       id: param.id,
     };
@@ -47,13 +57,13 @@ export class BaseService {
    * @param param 数据
    */
   async update(param) {
-    if (!this.entity) {
+    if (!this.entityModel) {
       throw new Error(ERRINFO.NOENTITY);
     }
     if (!param.id) {
       throw new Error(ERRINFO.NOID);
     }
-    await this.entity.save(param);
+    await this.entityModel.save(param);
   }
 
   /**
@@ -61,11 +71,11 @@ export class BaseService {
    * @param ids 删除的ID集合 如：[1,2,3] 或者 1,2,3
    */
   async delete(ids) {
-    if (!this.entity) throw new Error(ERRINFO.NOENTITY);
+    if (!this.entityModel) throw new Error(ERRINFO.NOENTITY);
     if (ids instanceof Array) {
-      await this.entity.delete(ids);
+      await this.entityModel.delete(ids);
     } else {
-      await this.entity.delete(ids.split(','));
+      await this.entityModel.delete(ids.split(','));
     }
   }
 
@@ -73,7 +83,7 @@ export class BaseService {
    * 全量列表查询
    * */
   async list(query, option) {
-    if (!this.entity) {
+    if (!this.entityModel) {
       throw new Error(ERRINFO.NOENTITY);
     }
     const sql = await this.getOptionFind(query, option);
@@ -86,7 +96,7 @@ export class BaseService {
    * @param option 查询配置
    */
   async page(query, option) {
-    if (!this.entity) {
+    if (!this.entityModel) {
       throw new Error(ERRINFO.NOENTITY);
     }
     const sql = await this.getOptionFind(query, option);
@@ -98,16 +108,16 @@ export class BaseService {
    * @param infoIgnoreProperty 忽略返回属性
    */
   async info(id, infoIgnoreProperty) {
-    if (!this.entity) {
+    if (!this.entityModel) {
       throw new Error(ERRINFO.NOENTITY);
     }
     if (!id) {
       throw new Error(ERRINFO.NOID);
     }
-    const info = await this.entity.findOne({ id });
+    const info = await this.entityModel.findOne({ id });
     if (info && infoIgnoreProperty) {
       for (const property of infoIgnoreProperty) {
-        delete info[property];
+        info[property] = undefined;
       }
     }
     return info;
@@ -126,7 +136,7 @@ export class BaseService {
     connectionName = undefined
   ) {
     const {
-      // todo config
+      // todo size config
       size = 20,
       page = 1,
       order = 'createTime',
@@ -209,7 +219,7 @@ export class BaseService {
     let { order = 'createTime', sort = 'desc', keyword = '' } = query;
     const sqlArr = ['SELECT'];
     const selects = ['a.*'];
-    const find = this.entity.createQueryBuilder('a');
+    const find = this.entityModel.createQueryBuilder('a');
     if (option) {
       // 判断是否有关联查询，有的话取个别名
       if (!_.isEmpty(option.leftJoin)) {

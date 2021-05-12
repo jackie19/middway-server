@@ -64,13 +64,15 @@ export class ContainerLifeCycle extends BaseController implements ILifeCycle {
 
   async autoCrud() {
     const crudList = listModule(CONTROLLER_KEY);
-    let modelClass;
     for (const crud of crudList) {
-      const controllerOption = getClassMetadata(CONTROLLER_KEY, crud);
-      const { entity } = controllerOption.curdOptions || {};
+      const {
+        crudOptions = {},
+        routerOptions = {},
+        prefix = '',
+      } = getClassMetadata(CONTROLLER_KEY, crud);
+      const { entity } = crudOptions;
 
       if (entity) {
-        modelClass = entity;
         const entityModel = orm.useEntityModel(entity);
         const {
           api = [],
@@ -78,19 +80,17 @@ export class ContainerLifeCycle extends BaseController implements ILifeCycle {
           insertParam,
           infoIgnoreProperty,
           service,
-        } = controllerOption.curdOptions || {};
+        } = crudOptions;
         const middlewares = [];
         let middlewareConfigs = this.middlewareConfig || [];
-        middlewareConfigs = middlewareConfigs.concat(
-          controllerOption.routerOptions.middleware
-        );
+        middlewareConfigs = middlewareConfigs.concat(routerOptions.middleware);
         middlewareConfigs = Array.from(new Set(middlewareConfigs));
         for (const item of middlewareConfigs) {
           middlewares.push(await this.app['generateMiddleware'](item));
         }
         for (const url of api) {
           const method = url === 'info' ? 'get' : 'post';
-          const path = joinURLPath(controllerOption.prefix, url);
+          const path = joinURLPath(prefix, url);
           this.coreLogger.info(
             `\x1B[36m[configuration] crud add:  \x1B[0m ${path}`
           );
@@ -102,7 +102,7 @@ export class ContainerLifeCycle extends BaseController implements ILifeCycle {
               const baseService = (await ctx.requestContext.getAsync(
                 service ? service : BaseService
               )) as BaseService;
-              baseService.setModel(entityModel);
+              baseService.setEntityModel(entityModel);
               baseService.setCtx(ctx);
               const requestParams =
                 ctx.req.method === 'GET'
@@ -119,8 +119,10 @@ export class ContainerLifeCycle extends BaseController implements ILifeCycle {
               try {
                 switch (url) {
                   case 'add':
-                    this.validateParams(modelClass, requestParams);
-                    ctx.body = this.ok(await baseService.add(requestParams));
+                    this.validateParams(entity, requestParams);
+                    ctx.body = this.ok(
+                      await baseService.add(requestParams, crudOptions)
+                    );
                     break;
                   case 'delete':
                     ctx.body = this.ok(
@@ -128,7 +130,7 @@ export class ContainerLifeCycle extends BaseController implements ILifeCycle {
                     );
                     break;
                   case 'update':
-                    this.validateParams(modelClass, requestParams);
+                    this.validateParams(entity, requestParams);
                     ctx.body = this.ok(await baseService.update(requestParams));
                     break;
                   case 'info':
