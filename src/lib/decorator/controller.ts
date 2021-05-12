@@ -13,6 +13,7 @@ interface LeftJoinOption {
   entity: any;
   alias: string;
   condition: string;
+  selects: string[];
 }
 interface FieldEq {
   column: string;

@@ -136,7 +136,6 @@ export class BaseService {
     connectionName = undefined
   ) {
     const {
-      // todo size config
       size = 20,
       page = 1,
       order = 'createTime',
@@ -216,15 +215,15 @@ export class BaseService {
 
   async getOptionFind(query, option) {
     // eslint-disable-next-line prefer-const
-    let { order = 'createTime', sort = 'desc', keyword = '' } = query;
+    let { order = 'a.createTime', sort = 'desc', keyword = '' } = query;
     const sqlArr = ['SELECT'];
-    const selects = ['a.*'];
+    let selects = ['a.*'];
     const find = this.entityModel.createQueryBuilder('a');
     if (option) {
       // 判断是否有关联查询，有的话取个别名
       if (!_.isEmpty(option.leftJoin)) {
         for (const item of option.leftJoin) {
-          selects.push(`${item.alias}.*`);
+          selects = selects.concat(item.selects);
           find.leftJoin(item.entity, item.alias, item.condition);
         }
       }

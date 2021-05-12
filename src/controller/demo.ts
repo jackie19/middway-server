@@ -25,6 +25,14 @@ import { DemoAppMemEntity } from '../entity/member';
     orderBy: {
       price: 'DESC',
     },
+    leftJoin: [
+      {
+        entity: DemoAppMemEntity,
+        alias: 'b',
+        selects: ['b.username'],
+        condition: 'a.memberId = b.id',
+      },
+    ],
     // 筛选条件
     where: async () => {
       return [
