@@ -114,22 +114,31 @@ export class BaseService {
   /**
    * 获得单个ID
    * @param id ID
-   * @param infoIgnoreProperty 忽略返回属性
+   * @param options
    */
-  async info(id, infoIgnoreProperty) {
+  async info(id, options) {
     if (!this.entityModel) {
       throw new Error(ERRINFO.NOENTITY);
     }
     if (!id) {
       throw new Error(ERRINFO.NOID);
     }
-    const info = await this.entityModel.findOne({ id });
-    if (info && infoIgnoreProperty) {
-      for (const property of infoIgnoreProperty) {
-        info[property] = undefined;
-      }
+
+    let relations = [];
+    let adapter = i => i;
+
+    const { info } = options;
+    if (info) {
+      const res = await info(this.ctx, this.app);
+      relations = res.relations || relations;
+      adapter = res.adapter || adapter;
     }
-    return info;
+
+    let data = await this.entityModel.findOne({ id }, { relations });
+
+    data = adapter(data);
+
+    return data;
   }
   /**
    * 执行SQL并获得分页数据

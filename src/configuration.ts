@@ -74,13 +74,7 @@ export class ContainerLifeCycle extends BaseController implements ILifeCycle {
 
       if (entity) {
         const entityModel = orm.useEntityModel(entity);
-        const {
-          api = [],
-          queryOption,
-          insertParam,
-          infoIgnoreProperty,
-          service,
-        } = crudOptions;
+        const { api = [], queryOption, insertParam, service } = crudOptions;
         const middlewares = [];
         let middlewareConfigs = this.middlewareConfig || [];
         middlewareConfigs = middlewareConfigs.concat(routerOptions.middleware);
@@ -137,10 +131,7 @@ export class ContainerLifeCycle extends BaseController implements ILifeCycle {
                     break;
                   case 'info':
                     ctx.body = this.ok(
-                      await baseService.info(
-                        requestParams.id,
-                        infoIgnoreProperty
-                      )
+                      await baseService.info(requestParams.id, crudOptions)
                     );
                     break;
                   case 'list':

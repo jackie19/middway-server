@@ -1,8 +1,8 @@
 import { Get, Provide, App } from '@midwayjs/decorator';
 import { Application } from 'egg';
-import { IController } from '../core/decorator/controller';
-import { DemoAppGoodsEntity } from '../entity/goods';
-import { DemoAppCategoryEntity } from '../entity/category';
+import { IController } from '../../core/decorator/controller';
+import { DemoAppGoodsEntity } from '../../entity/goods';
+import { DemoAppCategoryEntity } from '../../entity/category';
 
 const add = (params, entityInstance) => {
   if (params.category) {
@@ -12,12 +12,23 @@ const add = (params, entityInstance) => {
   }
 };
 
+const info = async (ctx, app) => {
+  return {
+    relations: ['category'],
+    adapter: data => {
+      data.category = data.category.map(({ id, name }) => ({ id, name }));
+      return data;
+    },
+  };
+};
+
 @Provide()
 @IController('/goods', undefined, {
   api: ['add', 'delete', 'update', 'info', 'list', 'page'],
   entity: DemoAppGoodsEntity,
   add,
   update: add,
+  info,
   queryOption: {
     // 增加 sql select
     select: ['category.name as category_name', 'category.id as category_id'],
@@ -54,9 +65,3 @@ export class TestController {
     };
   }
 }
-
-@IController('/category', undefined, {
-  api: ['add', 'delete', 'update', 'info', 'list', 'page'],
-  entity: DemoAppCategoryEntity,
-})
-export class CategoryController {}
