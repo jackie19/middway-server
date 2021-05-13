@@ -3,6 +3,7 @@ import { Application } from 'egg';
 import * as _ from 'lodash';
 import { getManager, Brackets, Repository } from 'typeorm';
 import { ERRINFO } from '../constants/global';
+import { IQueryOption } from '../decorator/controller';
 
 @Provide()
 export class BaseService {
@@ -56,13 +57,21 @@ export class BaseService {
    * 修改
    * @param param 数据
    */
-  async update(param) {
+  async update(param, { entity, update }) {
     if (!this.entityModel) {
       throw new Error(ERRINFO.NOENTITY);
     }
     if (!param.id) {
       throw new Error(ERRINFO.NOID);
     }
+    const myEntity = new entity();
+    for (const key in param) {
+      myEntity[key] = param[key];
+    }
+    if (update) {
+      update(param, myEntity);
+    }
+
     await this.entityModel.save(param);
   }
 
@@ -100,7 +109,7 @@ export class BaseService {
       throw new Error(ERRINFO.NOENTITY);
     }
     const sql = await this.getOptionFind(query, option);
-    return this.sqlRenderPage(sql, query, true);
+    return this.sqlRenderPage(sql, query);
   }
   /**
    * 获得单个ID
@@ -129,45 +138,20 @@ export class BaseService {
    * @param autoSort 是否自动排序
    * @param connectionName 连接名称
    */
-  async sqlRenderPage(
-    sql,
-    query,
-    autoSort = false,
-    connectionName = undefined
-  ) {
-    const {
-      size = 20,
-      page = 1,
-      order = 'createTime',
-      sort = 'desc',
-      isExport = false,
-      maxExportLimit,
-    } = query;
-    if (order && sort && !autoSort) {
-      if (!this.paramSafetyCheck(order + sort)) {
-        throw new Error('非法传参~');
-      }
-      sql += ` ORDER BY ${order} ${sort}`;
-    }
-    if (isExport && maxExportLimit > 0) {
-      this.sqlParams.push(parseInt(maxExportLimit));
-      sql += ' LIMIT ? ';
-    }
-    if (!isExport) {
-      this.sqlParams.push((page - 1) * size);
-      this.sqlParams.push(parseInt(size));
-      sql += ' LIMIT ?,? ';
-    }
-    let params = [];
-    params = params.concat(this.sqlParams);
-    const result = await this.nativeQuery(sql, params, connectionName);
+  async sqlRenderPage(sql, query, connectionName = undefined) {
+    const { size = 20, page = 1 } = query;
+    this.sqlParams.push((page - 1) * size);
+    this.sqlParams.push(parseInt(size));
+    sql += ' LIMIT ?,? ';
+    const params = [...this.sqlParams];
+    const list = await this.nativeQuery(sql, params, connectionName);
     const countResult = await this.nativeQuery(
       this.getCountSql(sql),
       params,
       connectionName
     );
     return {
-      list: result,
+      list,
       pagination: {
         page: parseInt(page),
         size: parseInt(size),
@@ -203,23 +187,25 @@ export class BaseService {
     if (_.isEmpty(params)) {
       params = this.sqlParams;
     }
-    let newParams = [];
-    newParams = newParams.concat(params);
+    const newParams = [...params];
     this.sqlParams = [];
-    return await this.getOrmManager(connectionName).query(sql, newParams || []);
+    return await this.getOrmManager(connectionName).query(sql, newParams);
   }
 
   getOrmManager(connectionName) {
     return getManager(connectionName);
   }
 
-  async getOptionFind(query, option) {
+  async getOptionFind(query, option: IQueryOption) {
     // eslint-disable-next-line prefer-const
     let { order = 'a.createTime', sort = 'desc', keyword = '' } = query;
     const sqlArr = ['SELECT'];
     let selects = ['a.*'];
     const find = this.entityModel.createQueryBuilder('a');
     if (option) {
+      if (!_.isEmpty(option.leftJoinAndSelect)) {
+        find.leftJoinAndSelect(...option.leftJoinAndSelect);
+      }
       // 判断是否有关联查询，有的话取个别名
       if (!_.isEmpty(option.leftJoin)) {
         for (const item of option.leftJoin) {
@@ -232,23 +218,22 @@ export class BaseService {
         const wheres = await option.where(this.ctx, this.app);
         if (!_.isEmpty(wheres)) {
           for (const item of wheres) {
-            if (
-              item.length === 2 ||
-              (item.length === 3 &&
-                (item[2] || (item[2] === 0 && item[2] !== '')))
-            ) {
-              for (const key in item[1]) {
-                this.sqlParams.push(item[1][key]);
-              }
-              find.andWhere(item[0], item[1]);
+            for (const key in item[1]) {
+              this.sqlParams.push(item[1][key]);
             }
+            find.andWhere(item[0], item[1]);
           }
         }
       }
-      // 附加排序
-      if (!_.isEmpty(option.orderBy)) {
-        for (const key in option.orderBy) {
-          find.orderBy(key, option.orderBy[key].toUpperCase());
+      // 接口请求的排序
+      if (sort && order) {
+        const sorts = sort.toUpperCase().split(',');
+        const orders = order.split(',');
+        if (sorts.length !== orders.length) {
+          throw new Error('SORT FIELD');
+        }
+        for (const i in sorts) {
+          find.orderBy(orders[i], sorts[i]);
         }
       }
       // 关键字模糊搜索
@@ -268,7 +253,7 @@ export class BaseService {
       }
       // 筛选字段
       if (!_.isEmpty(option.select)) {
-        sqlArr.push(option.select.join(','));
+        sqlArr.push([...selects, ...option.select].join(','));
         find.select(option.select);
       } else {
         sqlArr.push(selects.join(','));
@@ -305,17 +290,6 @@ export class BaseService {
       }
     } else {
       sqlArr.push(selects.join(','));
-    }
-    // 接口请求的排序
-    if (sort && order) {
-      const sorts = sort.toUpperCase().split(',');
-      const orders = order.split(',');
-      if (sorts.length !== orders.length) {
-        throw new Error('SORT FIELD');
-      }
-      for (const i in sorts) {
-        find.orderBy(orders[i], sorts[i]);
-      }
     }
     const sqls = find.getSql().split('FROM');
     sqlArr.push('FROM');

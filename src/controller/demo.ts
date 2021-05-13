@@ -1,43 +1,44 @@
 import { Get, Provide, App } from '@midwayjs/decorator';
 import { Application } from 'egg';
-import { IController } from '../lib/decorator/controller';
+import { IController } from '../core/decorator/controller';
 import { DemoAppGoodsEntity } from '../entity/goods';
-import { DemoAppMemEntity } from '../entity/member';
+import { DemoAppCategoryEntity } from '../entity/category';
+
+const add = (params, entityInstance) => {
+  if (params.category) {
+    const category = new DemoAppCategoryEntity();
+    Object.assign(category, params.category);
+    entityInstance.category = [category];
+  }
+};
 
 @Provide()
-@IController('/test', undefined, {
+@IController('/goods', undefined, {
   api: ['add', 'delete', 'update', 'info', 'list', 'page'],
   entity: DemoAppGoodsEntity,
-  add: (params, entityInstance) => {
-    if (params.member) {
-      const member = new DemoAppMemEntity();
-      Object.assign(member, params.member);
-      entityInstance.member = member;
-      return member;
-    }
-  },
+  add,
+  update: add,
   queryOption: {
+    // 增加 sql select
+    select: ['category.name as category_name', 'category.id as category_id'],
+    leftJoinAndSelect: ['a.category', 'category'],
     // 模糊查询
     keywordLikeFields: ['title'],
     // 完全匹配
     fieldEq: ['type'],
-    // 排序
-    orderBy: {
-      price: 'DESC',
-    },
-    leftJoin: [
-      {
-        entity: DemoAppMemEntity,
-        alias: 'b',
-        selects: ['b.username'],
-        condition: 'a.memberId = b.id',
-      },
-    ],
+    // leftJoin: [
+    //   {
+    //     entity: DemoAppCategoryEntity,
+    //     alias: 'b',
+    //     selects: ['b.name'],
+    //     condition: 'a.memberId = b.id',
+    //   },
+    // ],
     // 筛选条件
     where: async () => {
       return [
-        // 满足条件才会执行
-        // ['a.price > :price', { price: 90.0 }, '条件'],
+        // 价格大于10
+        ['a.price > :price', { price: 10 }],
       ];
     },
   },
@@ -53,3 +54,9 @@ export class TestController {
     };
   }
 }
+
+@IController('/category', undefined, {
+  api: ['add', 'delete', 'update', 'info', 'list', 'page'],
+  entity: DemoAppCategoryEntity,
+})
+export class CategoryController {}

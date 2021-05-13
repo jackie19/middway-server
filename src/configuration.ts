@@ -131,7 +131,9 @@ export class ContainerLifeCycle extends BaseController implements ILifeCycle {
                     break;
                   case 'update':
                     this.validateParams(entity, requestParams);
-                    ctx.body = this.ok(await baseService.update(requestParams));
+                    ctx.body = this.ok(
+                      await baseService.update(requestParams, crudOptions)
+                    );
                     break;
                   case 'info':
                     ctx.body = this.ok(

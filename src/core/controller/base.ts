@@ -8,7 +8,7 @@ interface IRes {
   data?: any;
 }
 
-export class BaseController {
+export abstract class BaseController {
   @App()
   app: Application;
 

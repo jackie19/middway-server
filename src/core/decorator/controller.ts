@@ -24,27 +24,21 @@ interface AnyObject {
   [propName: string]: any;
 }
 
-interface Where {
-  [index: number]: [string, AnyObject, string?];
-}
+type WhereItem = [string, AnyObject];
 
 interface IWhereFunction {
-  (ctx: Context, app: Application): Promise<Where>;
+  (ctx: Context, app: Application): Promise<WhereItem[]>;
 }
 
-type orderTypes = 'DESC' | 'ASC';
+// type orderTypes = 'DESC' | 'ASC';
 
-interface IOrderBy {
-  [propName: string]: orderTypes;
-}
-
-interface IQueryOption {
+export interface IQueryOption {
   keywordLikeFields?: string[];
   where?: IWhereFunction;
   select?: string[];
   fieldEq?: string[] | FieldEq[];
-  orderBy?: IOrderBy;
   leftJoin?: LeftJoinOption[];
+  leftJoinAndSelect?: [string, string];
 }
 interface ICrudOptions extends AnyObject {
   api: APIS[];
