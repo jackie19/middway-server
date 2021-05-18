@@ -3,7 +3,7 @@ import { Application } from 'egg';
 import * as _ from 'lodash';
 import { getManager, Brackets, Repository } from 'typeorm';
 import { ERRINFO } from '../constants/global';
-import { IQueryOption } from '../decorator/controller';
+import { IQueryOption } from '../interface/base';
 
 @Provide()
 export class BaseService {
@@ -79,7 +79,7 @@ export class BaseService {
    * 删除
    * @param ids 删除的ID集合 如：[1,2,3] 或者 1,2,3
    */
-  async delete(ids) {
+  async delete({ ids }) {
     if (!this.entityModel) {
       throw new Error(ERRINFO.NOENTITY);
     }
@@ -118,7 +118,7 @@ export class BaseService {
    * @param id ID
    * @param options
    */
-  async info(id, options) {
+  async info({ id }, options) {
     if (!this.entityModel) {
       throw new Error(ERRINFO.NOENTITY);
     }

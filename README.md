@@ -42,13 +42,11 @@ $ npm stop
 - banner GET /api/banner
 - 配置全局路由前缀
 - 装饰器IController生成增删改查接口
-    - todo
-- 实体验证装饰器 entity.validator
+- swagger
 
 ### todo
 - oss 文件上传签名
 - 实体导出 schema 接口
-- swagger
 - 微信支付
 - jwt 鉴权
 

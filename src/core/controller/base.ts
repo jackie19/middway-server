@@ -1,12 +1,7 @@
 import { App } from '@midwayjs/decorator';
 import { Application } from 'egg';
 import { RESCODE, RESMESSAGE } from '../constants/global';
-
-interface IRes {
-  code: RESCODE;
-  message: RESMESSAGE;
-  data?: any;
-}
+import { IRes } from '../interface/base';
 
 export abstract class BaseController {
   @App()

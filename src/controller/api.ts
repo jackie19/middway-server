@@ -2,7 +2,6 @@ import { Inject, Controller, Get, Provide, Query } from '@midwayjs/decorator';
 import { Context } from 'egg';
 
 import { UserService } from '../service/user';
-import { DbService } from '../service/db';
 import { SignService } from '../service/sign';
 
 @Provide()
@@ -15,20 +14,12 @@ export class APIController {
   userService: UserService;
 
   @Inject()
-  dbService: DbService;
-
-  @Inject()
   signService: SignService;
 
   @Get('/user')
   async getUser(@Query() uid: string) {
     const user = await this.userService.getUser({ uid });
     return { success: true, message: 'OK', data: user };
-  }
-
-  async hasOpenidInDb(openid) {
-    const findUser = await this.dbService.getUser(openid);
-    return !(Array.isArray(findUser.data) && findUser.data.length === 0);
   }
 
   @Get('/wechat/login')
@@ -40,12 +31,6 @@ export class APIController {
       data.data.openid
     );
 
-    if (userinfo.data.openid) {
-      const alreadyHave = await this.hasOpenidInDb(userinfo.data.openid);
-      if (!alreadyHave) {
-        await this.dbService.saveUser(userinfo.data);
-      }
-    }
     if (!userinfo.data.openid) {
       return {
         code: userinfo.data.errcode,

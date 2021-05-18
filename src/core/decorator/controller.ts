@@ -5,46 +5,8 @@ import {
   CONTROLLER_KEY,
   saveModule,
 } from '@midwayjs/decorator';
-import { Context, Application } from 'egg';
 
-type APIS = 'add' | 'delete' | 'update' | 'page' | 'info' | 'list';
-
-interface LeftJoinOption {
-  entity: any;
-  alias: string;
-  condition: string;
-  selects: string[];
-}
-interface FieldEq {
-  column: string;
-  requestParam: string;
-}
-
-interface AnyObject {
-  [propName: string]: any;
-}
-
-type WhereItem = [string, AnyObject];
-
-interface IWhereFunction {
-  (ctx: Context, app: Application): Promise<WhereItem[]>;
-}
-
-// type orderTypes = 'DESC' | 'ASC';
-
-export interface IQueryOption {
-  keywordLikeFields?: string[];
-  where?: IWhereFunction;
-  select?: string[];
-  fieldEq?: string[] | FieldEq[];
-  leftJoin?: LeftJoinOption[];
-  leftJoinAndSelect?: [string, string];
-}
-interface ICrudOptions extends AnyObject {
-  api: APIS[];
-  entity: any;
-  queryOption?: IQueryOption;
-}
+import { ICrudOptions } from '../interface/base';
 
 export function IController(
   prefix = '/',

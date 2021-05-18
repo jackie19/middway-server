@@ -101,6 +101,17 @@ export class ContainerLifeCycle extends BaseController implements ILifeCycle {
     }
   }
 
+  async getMiddleware(routerMiddleware) {
+    const middlewares = [];
+    let middlewareConfigs = this.middlewareConfig || [];
+    middlewareConfigs = middlewareConfigs.concat(routerMiddleware);
+    middlewareConfigs = Array.from(new Set(middlewareConfigs));
+    for (const item of middlewareConfigs) {
+      middlewares.push(await this.app.generateMiddleware(item));
+    }
+    return middlewares;
+  }
+
   async autoCrud() {
     const crudList = listModule(CONTROLLER_KEY);
     for (const crud of crudList) {
@@ -114,13 +125,8 @@ export class ContainerLifeCycle extends BaseController implements ILifeCycle {
       if (entity) {
         const entityModel = orm.useEntityModel(entity);
         const { api = [], queryOption, insertParam, service } = crudOptions;
-        const middlewares = [];
-        let middlewareConfigs = this.middlewareConfig || [];
-        middlewareConfigs = middlewareConfigs.concat(routerOptions.middleware);
-        middlewareConfigs = Array.from(new Set(middlewareConfigs));
-        for (const item of middlewareConfigs) {
-          middlewares.push(await this.app['generateMiddleware'](item));
-        }
+        const middlewares = await this.getMiddleware(routerOptions.middleware);
+
         for (const url of api) {
           const method = url === 'info' ? 'get' : 'post';
           const path = joinURLPath(prefix, url);
@@ -187,35 +193,19 @@ export class ContainerLifeCycle extends BaseController implements ILifeCycle {
               try {
                 switch (url) {
                   case 'add':
-                    this.validateParams(entity, requestParams);
-                    ctx.body = this.ok(
-                      await baseService.add(requestParams, crudOptions)
-                    );
-                    break;
                   case 'update':
-                    this.validateParams(entity, requestParams);
-                    ctx.body = this.ok(
-                      await baseService.update(requestParams, crudOptions)
-                    );
-                    break;
                   case 'delete':
-                    ctx.body = this.ok(
-                      await baseService.delete(requestParams.ids)
-                    );
-                    break;
                   case 'info':
+                    url !== 'info' &&
+                      this.validateParams(entity, requestParams);
                     ctx.body = this.ok(
-                      await baseService.info(requestParams.id, crudOptions)
+                      await baseService[url](requestParams, crudOptions)
                     );
                     break;
                   case 'list':
-                    ctx.body = this.ok(
-                      await baseService.list(requestParams, queryOption)
-                    );
-                    break;
                   case 'page':
                     ctx.body = this.ok(
-                      await baseService.page(requestParams, queryOption)
+                      await baseService[url](requestParams, queryOption)
                     );
                     break;
                 }
