@@ -1,14 +1,6 @@
-import {
-  Inject,
-  Controller,
-  Get,
-  Post,
-  Body,
-  Provide,
-  Query,
-  ALL,
-} from '@midwayjs/decorator';
+import { Inject, Controller, Get, Provide, Query } from '@midwayjs/decorator';
 import { Context } from 'egg';
+
 import { UserService } from '../service/user';
 import { DbService } from '../service/db';
 import { SignService } from '../service/sign';
@@ -40,8 +32,8 @@ export class APIController {
   }
 
   @Get('/wechat/login')
-  async login(@Query(ALL) query) {
-    const data = await this.userService.webToken(query.code);
+  async login(@Query('code') code: string) {
+    const data = await this.userService.webToken(code);
 
     const userinfo = await this.userService.userinfo(
       data.data.access_token,
@@ -63,30 +55,8 @@ export class APIController {
     return { code: 200, data: userinfo.data };
   }
 
-  @Post('/user')
-  async saveUser(@Body(ALL) query) {
-    const alreadyHave = await this.hasOpenidInDb(query.openid);
-    if (!alreadyHave) {
-      return await this.dbService.saveUser(query);
-    } else {
-      return {
-        code: 200,
-        message: '',
-      };
-    }
-  }
-
-  @Get('/banner')
-  async banner() {
-    return [
-      {
-        img: '/public/banner-1.jpg',
-      },
-    ];
-  }
-
   @Get('/wechat/jssdk/sign')
-  async jssdk(@Query('path') path) {
+  async jssdk(@Query('path') path: string) {
     return await this.signService.getSign({
       path,
     });

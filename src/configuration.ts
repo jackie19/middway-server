@@ -4,24 +4,63 @@ import {
   Logger,
   Config,
   listModule,
-  CONTROLLER_KEY,
   getClassMetadata,
+  attachClassMetadata,
+  attachPropertyDataToClass,
+  RouteParamTypes,
   RULES_KEY,
+  WEB_ROUTER_KEY,
+  CONTROLLER_KEY,
+  WEB_ROUTER_PARAM_KEY,
 } from '@midwayjs/decorator';
 import { ILifeCycle } from '@midwayjs/core';
 // eslint-disable-next-line node/no-extraneous-import
 import { ILogger } from '@midwayjs/logger';
 import * as orm from '@midwayjs/orm';
 import { joinURLPath } from '@midwayjs/core/dist/util';
+import * as swagger from '@midwayjs/swagger';
 import * as bodyParser from 'koa-bodyparser';
 import { Application } from 'egg';
 import { join } from 'path';
+import * as Joi from 'joi';
 import { BaseService } from './core/service/base';
 import { BaseController } from './core/controller/base';
-import { validate } from './core/entity.validator/';
+import { PageEntity, ListEntity, DeleteEntity } from './core/entity/base';
+
+function getMetadataValue(url, entity) {
+  switch (url) {
+    case 'add':
+      return [entity];
+    case 'delete':
+      return [DeleteEntity];
+    case 'list':
+      return [ListEntity];
+    case 'page':
+      return [PageEntity];
+    case 'update':
+      addPropertyToEntity(entity, 'id');
+      return [entity];
+    case 'info':
+      return [String];
+  }
+}
+
+function addPropertyToEntity(target, propertyKey) {
+  attachClassMetadata(
+    swagger.SWAGGER_DOCUMENT_KEY,
+    {
+      description: 'id',
+      type: 'number',
+      isBaseType: true,
+      originDesign: Number,
+    },
+    target,
+    propertyKey
+  );
+}
 
 @Configuration({
-  imports: [orm],
+  imports: [orm, swagger],
   importConfigs: [join(__dirname, './config')],
   conflictCheck: true,
 })
@@ -88,6 +127,41 @@ export class ContainerLifeCycle extends BaseController implements ILifeCycle {
           this.coreLogger.info(
             `\x1B[36m[configuration] crud add:  \x1B[0m ${path}`
           );
+
+          // 给实体添加元数据
+          const propertyName = (prefix + url).replace(/\//g, '');
+          crud.prototype[propertyName] = () => {};
+
+          const metadataValue = getMetadataValue(url, entity);
+          Reflect.defineMetadata(
+            'design:paramtypes',
+            metadataValue,
+            crud.prototype,
+            propertyName
+          );
+
+          // 添加 router 元数据, 提供给swagger读取
+          attachClassMetadata(
+            WEB_ROUTER_KEY,
+            {
+              path: `/${url}`,
+              requestMethod: method,
+              middleware: middlewares,
+              method: propertyName,
+            },
+            crud
+          );
+          attachPropertyDataToClass(
+            WEB_ROUTER_PARAM_KEY,
+            {
+              index: 0,
+              type:
+                url === 'info' ? RouteParamTypes.QUERY : RouteParamTypes.BODY, // query 0, body 1
+              propertyData: url === 'info' ? 'id' : '',
+            },
+            crud,
+            propertyName
+          );
           this.app.router[method](
             path,
             bodyParser(),
@@ -118,15 +192,15 @@ export class ContainerLifeCycle extends BaseController implements ILifeCycle {
                       await baseService.add(requestParams, crudOptions)
                     );
                     break;
-                  case 'delete':
-                    ctx.body = this.ok(
-                      await baseService.delete(requestParams.ids)
-                    );
-                    break;
                   case 'update':
                     this.validateParams(entity, requestParams);
                     ctx.body = this.ok(
                       await baseService.update(requestParams, crudOptions)
+                    );
+                    break;
+                  case 'delete':
+                    ctx.body = this.ok(
+                      await baseService.delete(requestParams.ids)
                     );
                     break;
                   case 'info':
@@ -158,10 +232,10 @@ export class ContainerLifeCycle extends BaseController implements ILifeCycle {
   validateParams(modelClass, params) {
     // 获得校验规则
     const rules = getClassMetadata(RULES_KEY, modelClass);
-
-    const result = validate(rules, params);
-    if (!result.success) {
-      throw new Error(result.error.messages);
+    const schema = Joi.object(rules);
+    const result = schema.validate(params);
+    if (result.error) {
+      throw new Error(result.error.message);
     }
   }
 }

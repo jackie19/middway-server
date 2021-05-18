@@ -80,7 +80,9 @@ export class BaseService {
    * @param ids 删除的ID集合 如：[1,2,3] 或者 1,2,3
    */
   async delete(ids) {
-    if (!this.entityModel) throw new Error(ERRINFO.NOENTITY);
+    if (!this.entityModel) {
+      throw new Error(ERRINFO.NOENTITY);
+    }
     if (ids instanceof Array) {
       await this.entityModel.delete(ids);
     } else {
@@ -136,9 +138,11 @@ export class BaseService {
 
     let data = await this.entityModel.findOne({ id }, { relations });
 
-    data = adapter(data);
+    if (data) {
+      data = adapter(data);
+    }
 
-    return data;
+    return data || {};
   }
   /**
    * 执行SQL并获得分页数据

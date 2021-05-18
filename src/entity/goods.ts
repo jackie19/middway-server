@@ -1,42 +1,40 @@
 import { EntityModel } from '@midwayjs/orm';
 import { Column, ManyToMany } from 'typeorm';
+import { CreateApiPropertyDoc } from '@midwayjs/swagger';
+import { Rule, RuleType } from '@midwayjs/decorator';
 import { BaseEntity } from '../core/entity/base';
-import { EntityValidator, Rules } from '../core/entity.validator';
 import { DemoAppCategoryEntity } from './category';
+import * as Joi from 'joi';
 
 /**
  * 商品
  */
-@EntityValidator()
 @EntityModel('demo_app_goods')
 export class DemoAppGoodsEntity extends BaseEntity {
-  @Rules([
-    { required: true, message: '请输入标题' },
-    {
-      message: '标题不能超过10个字符',
-      validator: (val: string) => val.length <= 10,
-    },
-  ])
+  @CreateApiPropertyDoc('标题', {
+    example: '华为荣耀',
+  })
+  @Rule(RuleType.string().required().max(10))
   @Column({ comment: '标题' })
   title: string;
 
+  @CreateApiPropertyDoc('图片')
   @Column({ comment: '图片' })
   pic: string;
 
-  @Rules([
-    {
-      message: '价格不能超过100',
-      validator: (val: number) => val <= 100,
-    },
-  ])
+  @CreateApiPropertyDoc('价格', { example: 99 })
+  @Rule(RuleType.number().required().max(100))
   @Column({ comment: '价格', type: 'decimal', precision: 5, scale: 2 })
   price: number;
 
-  @Column({ comment: '分类', type: 'tinyint' })
-  type: number;
-
+  @CreateApiPropertyDoc('分类', {
+    description: '产品分类',
+    example: [{ id: 1, name: 'electron' }],
+  })
+  // 配合 CreateApiPropertyDoc 生成文档
+  @Rule(RuleType.array().items(Joi.object()))
   @ManyToMany(() => DemoAppCategoryEntity, category => category.goods, {
     cascade: true,
   })
-  category: DemoAppCategoryEntity[];
+  category;
 }

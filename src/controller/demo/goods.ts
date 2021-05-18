@@ -1,4 +1,4 @@
-import { Get, Provide, App } from '@midwayjs/decorator';
+import { Provide, App } from '@midwayjs/decorator';
 import { Application } from 'egg';
 import { IController } from '../../core/decorator/controller';
 import { DemoAppGoodsEntity } from '../../entity/goods';
@@ -57,11 +57,4 @@ const info = async (ctx, app) => {
 export class TestController {
   @App()
   app: Application;
-
-  @Get('/menu')
-  async getMenu() {
-    return {
-      aa: 1,
-    };
-  }
 }
