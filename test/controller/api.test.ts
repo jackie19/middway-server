@@ -14,14 +14,24 @@ describe("test/controller/api.test.ts", () => {
     await close(app);
   });
 
-  it("should POST /api/get_user", async () => {
+  it("should POST /goods/add", async () => {
     // make request
     const result = await createHttpRequest(app)
-      .post("/api/get_user")
-      .query({ uid: 123 });
+      .post("/dxp/goods/add")
+      .send({
+        "title": "小鹏y",
+        "pic": "1400",
+        "price": "111",
+        "type": "2",
+        "category":{
+          "id": 1,
+          "name": "electron"
+        }
+      })
 
     // use expect by jest
     expect(result.status).toBe(200);
-    expect(result.body.message).toBe("OK");
+    expect(result.body.code).toBe(1001);
+    expect(result.body.message).toBe("\"price\" must be less than or equal to 100");
   });
 });
