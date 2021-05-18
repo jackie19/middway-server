@@ -93,7 +93,7 @@ export class BaseService {
   /*
    * 全量列表查询
    * */
-  async list(query, option) {
+  async list(query, { queryOption: option }) {
     if (!this.entityModel) {
       throw new Error(ERRINFO.NOENTITY);
     }
@@ -106,7 +106,7 @@ export class BaseService {
    * @param query 查询条件
    * @param option 查询配置
    */
-  async page(query, option) {
+  async page(query, { queryOption: option }) {
     if (!this.entityModel) {
       throw new Error(ERRINFO.NOENTITY);
     }

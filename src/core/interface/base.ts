@@ -2,9 +2,7 @@
  * @description
  */
 import { Application, Context } from 'egg';
-import { RESCODE, RESMESSAGE } from '../constants/global';
-
-type APIS = 'add' | 'delete' | 'update' | 'page' | 'info' | 'list';
+import { RESCODE, RESMESSAGE, APIS } from '../constants/global';
 
 interface LeftJoinOption {
   entity: any;

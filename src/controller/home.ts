@@ -26,11 +26,11 @@ export class HomeController {
 
   @Get('/index')
   async home(
-    @Query() signature,
-    @Query() nonce,
-    @Query() timestamp,
-    @Query() echostr,
-    @Query() token
+    @Query() signature: string,
+    @Query() nonce: string,
+    @Query() timestamp: string,
+    @Query() echostr: string,
+    @Query() token: string
   ) {
     const str = [token, timestamp, nonce].sort().join('');
     const sha = sha1(str);

@@ -38,6 +38,8 @@ function getMetadataValue(url, entity) {
     case 'page':
       return [PageEntity];
     case 'update':
+      // fixme 会污染 add 接口
+      // class 如何 clone ?
       addPropertyToEntity(entity, 'id');
       return [entity];
     case 'info':
@@ -78,7 +80,9 @@ export class ContainerLifeCycle extends BaseController implements ILifeCycle {
   middlewareConfig;
 
   async onReady() {
-    this.handlerRouterPrefix();
+    // swagger 不能适配全局路由前缀
+    // 通过 IController 注入全局路由前缀
+    // this.handlerRouterPrefix();
     await this.autoCrud();
   }
 
@@ -112,20 +116,56 @@ export class ContainerLifeCycle extends BaseController implements ILifeCycle {
     return middlewares;
   }
 
+  configSwagger({ url, prefix, entity, method, middleware, crudModule }) {
+    // 给实体添加元数据
+    const propertyName = (prefix + url).replace(/\//g, '');
+    crudModule.prototype[propertyName] = () => {};
+
+    const metadataValue = getMetadataValue(url, entity);
+    Reflect.defineMetadata(
+      'design:paramtypes',
+      metadataValue,
+      crudModule.prototype,
+      propertyName
+    );
+
+    // 添加 router 元数据, 提供给swagger读取
+    attachClassMetadata(
+      WEB_ROUTER_KEY,
+      {
+        path: `/${url}`,
+        requestMethod: method,
+        middleware,
+        method: propertyName,
+      },
+      crudModule
+    );
+    attachPropertyDataToClass(
+      WEB_ROUTER_PARAM_KEY,
+      {
+        index: 0,
+        type: url === 'info' ? RouteParamTypes.QUERY : RouteParamTypes.BODY, // query 0, body 1
+        propertyData: url === 'info' ? 'id' : '',
+      },
+      crudModule,
+      propertyName
+    );
+  }
+
   async autoCrud() {
-    const crudList = listModule(CONTROLLER_KEY);
-    for (const crud of crudList) {
+    const crudModuleList = listModule(CONTROLLER_KEY);
+    for (const crudModule of crudModuleList) {
       const {
         crudOptions = {},
         routerOptions = {},
         prefix = '',
-      } = getClassMetadata(CONTROLLER_KEY, crud);
+      } = getClassMetadata(CONTROLLER_KEY, crudModule);
       const { entity } = crudOptions;
 
       if (entity) {
         const entityModel = orm.useEntityModel(entity);
-        const { api = [], queryOption, insertParam, service } = crudOptions;
-        const middlewares = await this.getMiddleware(routerOptions.middleware);
+        const { api = [], insertParam, service } = crudOptions;
+        const middleware = await this.getMiddleware(routerOptions.middleware);
 
         for (const url of api) {
           const method = url === 'info' ? 'get' : 'post';
@@ -134,44 +174,19 @@ export class ContainerLifeCycle extends BaseController implements ILifeCycle {
             `\x1B[36m[configuration] crud add:  \x1B[0m ${path}`
           );
 
-          // 给实体添加元数据
-          const propertyName = (prefix + url).replace(/\//g, '');
-          crud.prototype[propertyName] = () => {};
+          this.configSwagger({
+            url,
+            crudModule,
+            entity,
+            middleware,
+            method,
+            prefix,
+          });
 
-          const metadataValue = getMetadataValue(url, entity);
-          Reflect.defineMetadata(
-            'design:paramtypes',
-            metadataValue,
-            crud.prototype,
-            propertyName
-          );
-
-          // 添加 router 元数据, 提供给swagger读取
-          attachClassMetadata(
-            WEB_ROUTER_KEY,
-            {
-              path: `/${url}`,
-              requestMethod: method,
-              middleware: middlewares,
-              method: propertyName,
-            },
-            crud
-          );
-          attachPropertyDataToClass(
-            WEB_ROUTER_PARAM_KEY,
-            {
-              index: 0,
-              type:
-                url === 'info' ? RouteParamTypes.QUERY : RouteParamTypes.BODY, // query 0, body 1
-              propertyData: url === 'info' ? 'id' : '',
-            },
-            crud,
-            propertyName
-          );
           this.app.router[method](
             path,
             bodyParser(),
-            ...middlewares,
+            ...middleware,
             async ctx => {
               const baseService = (await ctx.requestContext.getAsync(
                 service ? service : BaseService
@@ -194,21 +209,12 @@ export class ContainerLifeCycle extends BaseController implements ILifeCycle {
                 switch (url) {
                   case 'add':
                   case 'update':
-                  case 'delete':
-                  case 'info':
-                    url !== 'info' &&
-                      this.validateParams(entity, requestParams);
-                    ctx.body = this.ok(
-                      await baseService[url](requestParams, crudOptions)
-                    );
-                    break;
-                  case 'list':
-                  case 'page':
-                    ctx.body = this.ok(
-                      await baseService[url](requestParams, queryOption)
-                    );
+                    this.validateParams(entity, requestParams, url);
                     break;
                 }
+                ctx.body = this.ok(
+                  await baseService[url](requestParams, crudOptions)
+                );
               } catch (e) {
                 ctx.body = this.fail(e.message);
               }
@@ -219,9 +225,15 @@ export class ContainerLifeCycle extends BaseController implements ILifeCycle {
     }
   }
 
-  validateParams(modelClass, params) {
+  validateParams(modelClass, params, url: string) {
     // 获得校验规则
-    const rules = getClassMetadata(RULES_KEY, modelClass);
+    let rules = getClassMetadata(RULES_KEY, modelClass);
+    if (url === 'update') {
+      rules = {
+        ...rules,
+        id: Joi.number().required(),
+      };
+    }
     const schema = Joi.object(rules);
     const result = schema.validate(params);
     if (result.error) {

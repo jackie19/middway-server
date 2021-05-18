@@ -1,8 +1,9 @@
-import { Provide, App } from '@midwayjs/decorator';
+import { App, Provide } from '@midwayjs/decorator';
 import { Application } from 'egg';
 import { IController } from '../../core/decorator/controller';
 import { DemoAppGoodsEntity } from '../../entity/goods';
 import { DemoAppCategoryEntity } from '../../entity/category';
+import { APIS } from '../../core/constants/global';
 
 const add = (params, entityInstance) => {
   if (params.category) {
@@ -24,7 +25,7 @@ const info = async (ctx, app) => {
 
 @Provide()
 @IController('/goods', undefined, {
-  api: ['add', 'delete', 'update', 'info', 'list', 'page'],
+  api: [APIS.ADD, APIS.INFO, APIS.UPDATE, APIS.LIST, APIS.PAGE, APIS.DELETE],
   entity: DemoAppGoodsEntity,
   add,
   update: add,

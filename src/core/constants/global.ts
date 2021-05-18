@@ -1,3 +1,12 @@
+export enum APIS {
+  ADD = 'add',
+  UPDATE = 'update',
+  DELETE = 'delete',
+  INFO = 'info',
+  LIST = 'list',
+  PAGE = 'page',
+}
+
 /**
  * 返回码
  */
