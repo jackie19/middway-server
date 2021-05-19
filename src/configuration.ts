@@ -26,6 +26,7 @@ import * as Joi from 'joi';
 import { BaseService } from './core/service/base';
 import { BaseController } from './core/controller/base';
 import { PageEntity, ListEntity, DeleteEntity } from './core/entity/base';
+import { APIS } from './core/constants/global';
 
 function getMetadataValue(url, entity) {
   switch (url) {
@@ -38,15 +39,13 @@ function getMetadataValue(url, entity) {
     case 'page':
       return [PageEntity, String];
     case 'update':
-      // fixme 会污染 add 接口
-      // class 如何 clone ?
-      addPropertyToEntity(entity, 'id');
-      return [entity, String];
+      return [entity, String, String];
     case 'info':
-      return [String, String];
+      return [String, String, String];
   }
 }
 
+/*
 function addPropertyToEntity(target, propertyKey) {
   attachClassMetadata(
     swagger.SWAGGER_DOCUMENT_KEY,
@@ -60,6 +59,7 @@ function addPropertyToEntity(target, propertyKey) {
     propertyKey
   );
 }
+*/
 
 @Configuration({
   imports: [orm, swagger],
@@ -116,12 +116,70 @@ export class ContainerLifeCycle extends BaseController implements ILifeCycle {
     return middlewares;
   }
 
+  attachPropertyDataToClass({ data, crudModule, propertyName }) {
+    // data.index 为 controller 方法参数类型元数据
+    // data:
+    // {
+    //         index,
+    //         type,
+    //         propertyData,
+    //       },
+    attachPropertyDataToClass(
+      WEB_ROUTER_PARAM_KEY,
+      data,
+      crudModule,
+      propertyName
+    );
+  }
+
+  addToken2Header(crudModule, propertyName) {
+    this.attachPropertyDataToClass({
+      crudModule,
+      propertyName,
+      data: {
+        index: 1,
+        type: RouteParamTypes.HEADERS,
+        propertyData: 'token',
+      },
+    });
+  }
+
+  addIdParam(url, crudModule, propertyName) {
+    if (url === APIS.UPDATE || url === APIS.INFO) {
+      this.attachPropertyDataToClass({
+        data: {
+          type: RouteParamTypes.QUERY,
+          index: 2,
+          propertyData: 'id',
+        },
+        crudModule,
+        propertyName,
+      });
+    }
+  }
+
+  postApiAddBody(method, crudModule, propertyName) {
+    if (method === 'POST') {
+      this.attachPropertyDataToClass({
+        data: {
+          index: 0,
+          type: RouteParamTypes.BODY,
+          propertyData: '',
+        },
+        crudModule,
+        propertyName,
+      });
+    }
+  }
+
   configSwagger({ url, prefix, entity, method, middleware, crudModule }) {
-    // 给实体添加元数据
     const propertyName = (prefix + url).replace(/\//g, '');
     crudModule.prototype[propertyName] = () => {};
 
+    // 获取方法参数类型
     const metadataValue = getMetadataValue(url, entity);
+    // 给controller添加元数据
+    // swagger 读取元数据
     Reflect.defineMetadata(
       'design:paramtypes',
       metadataValue,
@@ -140,26 +198,10 @@ export class ContainerLifeCycle extends BaseController implements ILifeCycle {
       },
       crudModule
     );
-    attachPropertyDataToClass(
-      WEB_ROUTER_PARAM_KEY,
-      {
-        index: 0,
-        type: url === 'info' ? RouteParamTypes.QUERY : RouteParamTypes.BODY, // query 0, body 1
-        propertyData: url === 'info' ? 'id' : '',
-      },
-      crudModule,
-      propertyName
-    );
-    attachPropertyDataToClass(
-      WEB_ROUTER_PARAM_KEY,
-      {
-        index: 1,
-        type: RouteParamTypes.HEADERS, // query 0, body 1
-        propertyData: 'token',
-      },
-      crudModule,
-      propertyName
-    );
+
+    this.postApiAddBody(method, crudModule, propertyName);
+    this.addToken2Header(crudModule, propertyName);
+    this.addIdParam(url, crudModule, propertyName);
   }
 
   async autoCrud() {
@@ -218,7 +260,10 @@ export class ContainerLifeCycle extends BaseController implements ILifeCycle {
               try {
                 switch (url) {
                   case 'add':
+                    this.validateParams(entity, requestParams, url);
+                    break;
                   case 'update':
+                    requestParams.id = ctx.request.query.id;
                     this.validateParams(entity, requestParams, url);
                     break;
                 }
@@ -238,10 +283,10 @@ export class ContainerLifeCycle extends BaseController implements ILifeCycle {
   validateParams(modelClass, params, url: string) {
     // 获得校验规则
     let rules = getClassMetadata(RULES_KEY, modelClass);
-    if (url === 'update') {
+    if (url === APIS.UPDATE) {
       rules = {
         ...rules,
-        id: Joi.number().required(),
+        id: Joi.string().required(),
       };
     }
     const schema = Joi.object(rules);

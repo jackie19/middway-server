@@ -45,6 +45,7 @@ $ npm stop
 - swagger
 
 ### todo
+- nacos
 - oss 文件上传签名
 - 实体导出 schema 接口
 - 微信支付
