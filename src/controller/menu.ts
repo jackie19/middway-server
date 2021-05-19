@@ -1,4 +1,11 @@
-import { Inject, Controller, Get, Provide, App } from '@midwayjs/decorator';
+import {
+  Inject,
+  Controller,
+  Get,
+  Patch,
+  Provide,
+  App,
+} from '@midwayjs/decorator';
 import { Application } from 'egg';
 import { WechatService } from '../service/wechat';
 
@@ -13,6 +20,14 @@ export class MenuController {
 
   @Get('/menu')
   async getMenu() {
+    const res = await this.wechatService.updateMenu();
+    return {
+      code: 200,
+      message: res,
+    };
+  }
+  @Patch('/menu')
+  async saveMenu() {
     const res = await this.wechatService.updateMenu();
     return {
       code: 200,
