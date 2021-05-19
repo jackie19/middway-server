@@ -30,20 +30,20 @@ import { PageEntity, ListEntity, DeleteEntity } from './core/entity/base';
 function getMetadataValue(url, entity) {
   switch (url) {
     case 'add':
-      return [entity];
+      return [entity, String];
     case 'delete':
-      return [DeleteEntity];
+      return [DeleteEntity, String];
     case 'list':
-      return [ListEntity];
+      return [ListEntity, String];
     case 'page':
-      return [PageEntity];
+      return [PageEntity, String];
     case 'update':
       // fixme 会污染 add 接口
       // class 如何 clone ?
       addPropertyToEntity(entity, 'id');
-      return [entity];
+      return [entity, String];
     case 'info':
-      return [String];
+      return [String, String];
   }
 }
 
@@ -146,6 +146,16 @@ export class ContainerLifeCycle extends BaseController implements ILifeCycle {
         index: 0,
         type: url === 'info' ? RouteParamTypes.QUERY : RouteParamTypes.BODY, // query 0, body 1
         propertyData: url === 'info' ? 'id' : '',
+      },
+      crudModule,
+      propertyName
+    );
+    attachPropertyDataToClass(
+      WEB_ROUTER_PARAM_KEY,
+      {
+        index: 1,
+        type: RouteParamTypes.HEADERS, // query 0, body 1
+        propertyData: 'token',
       },
       crudModule,
       propertyName
