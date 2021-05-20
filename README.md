@@ -32,20 +32,22 @@ $ npm stop
 ### feature
 - fs 缓存模块
     - todo redis 缓存
-- 微信后台接入接口 GET /api/wechat/index
-- 微信消息接口 POST /api/wechat/index
-- 微信菜单创建接口 GET /api/wechat/menu
-- web登录获取openid GET /api/wechat/login
-- jssdk 签名接口 GET /api/wechat/jssdk/sign
-- 取用户信息 GET /api/user
-- 保存用户信息 POST /api/user
-- banner GET /api/banner
-- 配置全局路由前缀
-- 装饰器IController生成增删改查接口
-- swagger
+
+- 接口
+    - 微信后台接入接口 GET /api/wechat/index
+    - 微信消息接口 POST /api/wechat/index
+    - 微信菜单创建接口 GET /api/wechat/menu
+    - web登录获取openid GET /api/wechat/login
+    - jssdk 签名接口 GET /api/wechat/jssdk/sign
+    - 商品接口,支持多对多
+    - 商品分类接口,支持多对多
+- 装饰器IController
+    - 配置全局路由前缀
+    - 生成crud接口
+    - 生成 swagger
+- nacos
 
 ### todo
-- nacos
 - oss 文件上传签名
 - 实体导出 schema 接口
 - 微信支付

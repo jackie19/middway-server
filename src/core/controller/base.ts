@@ -1,5 +1,5 @@
-import { App } from '@midwayjs/decorator';
-import { Application } from 'egg';
+import { App, Inject } from '@midwayjs/decorator';
+import { Application, Context } from 'egg';
 import { RESCODE, RESMESSAGE } from '../constants/global';
 import { IRes } from '../interface/base';
 
@@ -7,6 +7,8 @@ export abstract class BaseController {
   @App()
   app: Application;
 
+  @Inject()
+  ctx: Context;
   /**
    * 成功返回
    * @param data 返回数据

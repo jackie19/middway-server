@@ -10,4 +10,7 @@ module.exports = app => {
   app.messenger.on('test', data => {
     console.log('app: test update', data);
   });
+  app.messenger.on(app.config.nacos.dataId, data => {
+    app.config[app.config.nacos.dataId] = data;
+  });
 };

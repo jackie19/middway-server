@@ -1,4 +1,6 @@
 // agent.js
+import { NacosConfigClient } from 'nacos';
+
 import wechatApi from './lib/wechatApi';
 import cache from './lib/cache';
 
@@ -14,7 +16,25 @@ class Agent {
 
     this.app.messenger.on('egg-ready', async () => {
       await this.queen();
+      await this.nacos();
     });
+  }
+
+  async nacos() {
+    const { serverAddr, dataId, group } = this.app.config.nacos;
+    const configClient = new NacosConfigClient({
+      serverAddr,
+    });
+    configClient.subscribe(
+      {
+        dataId,
+        group,
+      },
+      content => {
+        console.log('nacos=========', dataId, content);
+        this.sendToApp(dataId, content);
+      }
+    );
   }
 
   async queen() {

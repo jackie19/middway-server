@@ -10,3 +10,9 @@ export interface IGetUserResponse {
   message: string;
   data: IUserOptions;
 }
+
+export interface INacos {
+  serverAddr: string;
+  group: string;
+  dataId: string;
+}
