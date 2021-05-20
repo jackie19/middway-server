@@ -1,5 +1,4 @@
 import { Inject, Controller, Get, Provide, Query } from '@midwayjs/decorator';
-import { Context } from 'egg';
 
 import { UserService } from '../service/user';
 import { SignService } from '../service/sign';
@@ -7,9 +6,6 @@ import { SignService } from '../service/sign';
 @Provide()
 @Controller('/api')
 export class APIController {
-  @Inject()
-  ctx: Context;
-
   @Inject()
   userService: UserService;
 

@@ -1,20 +1,9 @@
-import {
-  Inject,
-  Controller,
-  Get,
-  Patch,
-  Provide,
-  App,
-} from '@midwayjs/decorator';
-import { Application } from 'egg';
+import { Inject, Controller, Get, Patch, Provide } from '@midwayjs/decorator';
 import { WechatService } from '../service/wechat';
 
 @Provide()
 @Controller('/api/wechat')
 export class MenuController {
-  @App()
-  app: Application;
-
   @Inject()
   wechatService: WechatService;
 

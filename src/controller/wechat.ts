@@ -7,7 +7,6 @@ import {
   Config,
   Query,
 } from '@midwayjs/decorator';
-import { Context } from 'egg';
 import { WechatService } from '../service/wechat';
 
 const sha1 = require('sha1');
@@ -17,9 +16,6 @@ const sha1 = require('sha1');
 export class WechatController {
   @Config('wx')
   wx;
-
-  @Inject()
-  ctx: Context;
 
   @Inject()
   wechatService: WechatService;

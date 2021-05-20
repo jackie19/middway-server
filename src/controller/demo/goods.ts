@@ -1,5 +1,4 @@
-import { App, Provide } from '@midwayjs/decorator';
-import { Application } from 'egg';
+import { Provide } from '@midwayjs/decorator';
 import { IController } from '../../core/decorator/controller';
 import { DemoAppGoodsEntity } from '../../entity/goods';
 import { DemoAppCategoryEntity } from '../../entity/category';
@@ -55,7 +54,4 @@ const info = async (ctx, app) => {
     },
   },
 })
-export class TestController {
-  @App()
-  app: Application;
-}
+export class TestController {}
