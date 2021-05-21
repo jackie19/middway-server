@@ -19,6 +19,7 @@ import { ILogger } from '@midwayjs/logger';
 import * as orm from '@midwayjs/orm';
 import { joinURLPath } from '@midwayjs/core/dist/util';
 import * as swagger from '@midwayjs/swagger';
+import * as cache from '@midwayjs/cache';
 import * as bodyParser from 'koa-bodyparser';
 import { Application } from 'egg';
 import { join } from 'path';
@@ -62,7 +63,7 @@ function addPropertyToEntity(target, propertyKey) {
 */
 
 @Configuration({
-  imports: [orm, swagger],
+  imports: [orm, swagger, cache],
   importConfigs: [join(__dirname, './config')],
   conflictCheck: true,
 })

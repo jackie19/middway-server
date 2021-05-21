@@ -1,5 +1,6 @@
-import { Config, Provide } from '@midwayjs/decorator';
+import { Config, Provide, Inject } from '@midwayjs/decorator';
 import { InjectEntityModel } from '@midwayjs/orm';
+import { CacheManager } from '@midwayjs/cache';
 import { Repository } from 'typeorm';
 import * as md5 from 'md5';
 import * as jwt from 'jsonwebtoken';
@@ -15,6 +16,8 @@ export class LoginService extends BaseService {
 
   @Config()
   jwt;
+  @Inject()
+  cache: CacheManager;
 
   async login(data: LoginDTO) {
     const { username, password } = data;
@@ -41,6 +44,10 @@ export class LoginService extends BaseService {
         true
       ),
     };
+
+    await this.cache.set(`token:${username}`, result.token, {
+      ttl: result.expire,
+    });
 
     return result;
   }
