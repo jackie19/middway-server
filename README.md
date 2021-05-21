@@ -51,7 +51,7 @@ $ npm stop
 - oss 文件上传签名
 - 实体导出 schema 接口
 - 微信支付
-- jwt 鉴权
+- jwt 鉴权, auth 中间件
 
 
 

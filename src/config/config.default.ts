@@ -1,8 +1,8 @@
-import { EggAppConfig, EggAppInfo, PowerPartial } from 'egg';
+import { EggAppConfig, PowerPartial } from 'egg';
 
 export type DefaultConfig = PowerPartial<EggAppConfig>;
 
-export default (appInfo: EggAppInfo) => {
+export default appInfo => {
   const config = {} as DefaultConfig;
 
   // use for cookie sign key, should change to your own and keep security
@@ -26,7 +26,7 @@ export default (appInfo: EggAppInfo) => {
   config.wx = {};
 
   // 全局路由前缀
-  config.routerPrefix = '/dxp';
+  config.routerPrefix = 'api';
 
   config.midwayFeature = {
     replaceEggLogger: true,

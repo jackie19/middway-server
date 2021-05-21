@@ -5,8 +5,11 @@ import {
   CONTROLLER_KEY,
   saveModule,
 } from '@midwayjs/decorator';
+import { joinURLPath } from '@midwayjs/core/dist/util';
 
 import { ICrudOptions } from '../interface/base';
+
+import config from '../../config/config.default';
 
 // todo 获取 config
 export function IController(
@@ -19,7 +22,7 @@ export function IController(
     saveClassMetadata(
       CONTROLLER_KEY,
       {
-        prefix: `/api/${prefix}`,
+        prefix: joinURLPath(config({}).routerPrefix, prefix),
         routerOptions: {
           tagName: target.name,
           ...routerOptions,
