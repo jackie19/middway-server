@@ -15,7 +15,7 @@ import config from '../../config/config.default';
 export function IController(
   prefix = '/',
   routerOptions = { middleware: [], sensitive: true },
-  crudOptions: ICrudOptions
+  crudOptions?: ICrudOptions
 ): ClassDecorator {
   return target => {
     saveModule(CONTROLLER_KEY, target);

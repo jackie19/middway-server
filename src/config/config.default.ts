@@ -28,8 +28,14 @@ export default appInfo => {
   // 全局路由前缀
   config.routerPrefix = 'api';
 
-  config.midwayFeature = {
-    replaceEggLogger: true,
+  config.jwt = {
+    secret: 'OIDFJIIDDDDD',
+    token: {
+      // 2小时过期，需要用刷新token
+      expire: 2 * 3600,
+      // 15天内，如果没操作过就需要重新登录
+      refreshExpire: 24 * 3600 * 15,
+    },
   };
 
   return config;
