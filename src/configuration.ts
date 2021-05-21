@@ -1,16 +1,16 @@
 import {
   App,
-  Configuration,
-  Logger,
-  Config,
-  listModule,
-  getClassMetadata,
   attachClassMetadata,
   attachPropertyDataToClass,
+  Config,
+  Configuration,
+  CONTROLLER_KEY,
+  getClassMetadata,
+  listModule,
+  Logger,
   RouteParamTypes,
   RULES_KEY,
   WEB_ROUTER_KEY,
-  CONTROLLER_KEY,
   WEB_ROUTER_PARAM_KEY,
 } from '@midwayjs/decorator';
 import { ILifeCycle } from '@midwayjs/core';
@@ -25,8 +25,8 @@ import { join } from 'path';
 import * as Joi from 'joi';
 import { BaseService } from './core/service/base';
 import { BaseController } from './core/controller/base';
-import { PageEntity, ListEntity, DeleteEntity } from './core/entity/base';
-import { APIS } from './core/constants/global';
+import { DeleteEntity, ListEntity, PageEntity } from './core/entity/base';
+import { APIS, Method } from './core/constants/global';
 
 function getMetadataValue(url, entity) {
   switch (url) {
@@ -159,7 +159,7 @@ export class ContainerLifeCycle extends BaseController implements ILifeCycle {
   }
 
   postApiAddBody(method, crudModule, propertyName) {
-    if (method === 'POST') {
+    if (method === Method.post) {
       this.attachPropertyDataToClass({
         data: {
           index: 0,
@@ -220,7 +220,7 @@ export class ContainerLifeCycle extends BaseController implements ILifeCycle {
         const middleware = await this.getMiddleware(routerOptions.middleware);
 
         for (const url of api) {
-          const method = url === 'info' ? 'get' : 'post';
+          const method = url === APIS.INFO ? Method.get : Method.post;
           const path = joinURLPath(prefix, url);
           this.coreLogger.info(
             `\x1B[36m[configuration] crud add:  \x1B[0m ${path}`

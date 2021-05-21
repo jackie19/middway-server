@@ -1,3 +1,8 @@
+export enum Method {
+  post = 'post',
+  get = 'get',
+}
+
 export enum APIS {
   ADD = 'add',
   UPDATE = 'update',
