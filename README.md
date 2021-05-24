@@ -30,9 +30,6 @@ $ npm stop
 [midway]: https://midwayjs.org
 
 ### feature
-- fs 缓存模块
-    - todo redis 缓存
-
 - 接口
     - 微信后台接入接口 GET /api/wechat/index
     - 微信消息接口 POST /api/wechat/index
@@ -46,12 +43,13 @@ $ npm stop
     - 生成crud接口
     - 生成 swagger
 - nacos
+- jwt 鉴权, auth 中间件
 
 ### todo
 - oss 文件上传签名
 - 实体导出 schema 接口
 - 微信支付
-- jwt 鉴权, auth 中间件
+- core 组件
 
 
 
