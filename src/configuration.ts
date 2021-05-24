@@ -10,6 +10,7 @@ import {
   Logger,
   RouteParamTypes,
   RULES_KEY,
+  savePropertyMetadata,
   WEB_ROUTER_KEY,
   WEB_ROUTER_PARAM_KEY,
 } from '@midwayjs/decorator';
@@ -46,21 +47,89 @@ function getMetadataValue(url, entity) {
   }
 }
 
-/*
-function addPropertyToEntity(target, propertyKey) {
-  attachClassMetadata(
+function convertProperties(example, properties = null) {
+  if (!example && !properties) {
+    return undefined;
+  }
+  if (!properties) {
+    properties = {};
+    const exampleKeys = Object.keys(example);
+    for (let i = 0; i < exampleKeys.length; i++) {
+      const value = example[exampleKeys[i]];
+      const valueType = typeof value;
+      switch (valueType) {
+        case 'boolean':
+        case 'number':
+        case 'string':
+          properties[exampleKeys[i]] = {
+            type: valueType,
+          };
+          break;
+        case 'object':
+          if (Array.isArray(value)) {
+            properties[exampleKeys[i]] = {
+              type: 'array',
+              items: {
+                type: typeof value,
+                properties: convertProperties(value[0]),
+              },
+            };
+          } else {
+            properties[exampleKeys[i]] = {
+              type: 'object',
+              properties: convertProperties(example[exampleKeys[i]]),
+            };
+          }
+          break;
+        default:
+          break;
+      }
+    }
+  }
+  return properties;
+}
+function convertExample(example, respondType) {
+  if (example === null || example === undefined) {
+    return undefined;
+  }
+  switch (respondType) {
+    case 'object':
+    case 'json':
+    case 'boolean':
+    case 'number':
+      return example;
+  }
+  return example.toString();
+}
+
+function saveSwaggerResponse(target, propertyKey, options) {
+  savePropertyMetadata(
     swagger.SWAGGER_DOCUMENT_KEY,
     {
-      description: 'id',
-      type: 'number',
-      isBaseType: true,
-      originDesign: Number,
+      params: [],
+      response: [
+        {
+          status: 200,
+          description: '',
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: convertProperties(
+                  options.example,
+                  options.properties
+                ),
+                example: convertExample(options.example, 'json'),
+              },
+            },
+          },
+        },
+      ],
     },
     target,
     propertyKey
   );
 }
-*/
 
 @Configuration({
   imports: [orm, swagger, cache],
@@ -199,6 +268,24 @@ export class ContainerLifeCycle extends BaseController implements ILifeCycle {
       },
       crudModule
     );
+
+    let properties = undefined;
+    const options = {
+      example: {
+        code: 200,
+        message: 'success',
+        data: {},
+      },
+      properties,
+    };
+    if ([APIS.INFO, APIS.LIST, APIS.PAGE].includes(url)) {
+      properties = getClassMetadata(swagger.SWAGGER_DOCUMENT_KEY, entity);
+      options.properties = properties;
+      for (const propertyName in properties) {
+        options.example.data[propertyName] = properties[propertyName].example;
+      }
+    }
+    saveSwaggerResponse(crudModule, propertyName, options);
 
     this.postApiAddBody(method, crudModule, propertyName);
     this.addToken2Header(crudModule, propertyName);
