@@ -1,16 +1,7 @@
 import { Provide } from '@midwayjs/decorator';
 import { IController } from '../../core/decorator/controller';
 import { DemoAppGoodsEntity } from '../../entity/goods';
-import { DemoAppCategoryEntity } from '../../entity/category';
 import { APIS } from '../../core/constants/global';
-
-const add = (params, entityInstance) => {
-  if (params.category) {
-    const category = new DemoAppCategoryEntity();
-    Object.assign(category, params.category);
-    entityInstance.category = [category];
-  }
-};
 
 const info = async (ctx, app) => {
   return {
@@ -26,8 +17,6 @@ const info = async (ctx, app) => {
 @IController('/goods', undefined, {
   api: [APIS.ADD, APIS.INFO, APIS.UPDATE, APIS.LIST, APIS.PAGE, APIS.DELETE],
   entity: DemoAppGoodsEntity,
-  add,
-  update: add,
   info,
   queryOption: {
     // 增加 sql select

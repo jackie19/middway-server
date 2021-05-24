@@ -29,10 +29,10 @@ export class DemoAppGoodsEntity extends BaseEntity {
 
   @CreateApiPropertyDoc('分类', {
     description: '产品分类',
-    example: { id: 1, name: 'electron' },
+    example: [{ id: 1, name: 'electron' }],
   })
   // 配合 CreateApiPropertyDoc 生成文档
-  @Rule(RuleType.object())
+  @Rule(RuleType.array().items(RuleType.object()))
   @ManyToMany(() => DemoAppCategoryEntity, category => category.goods, {
     cascade: true,
   })
