@@ -9,12 +9,6 @@ export class UserService {
   @Config('wx')
   wx;
 
-  async getUser(options) {
-    return {
-      openid: options.openid,
-    };
-  }
-
   async webToken(code) {
     const data = await this.app.curl(
       `https://api.weixin.qq.com/sns/oauth2/access_token?appid=${this.wx.appID}&secret=${this.wx.appsecret}&code=${code}&grant_type=authorization_code`,

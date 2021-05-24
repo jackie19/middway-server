@@ -12,12 +12,6 @@ export class APIController {
   @Inject()
   signService: SignService;
 
-  @Get('/user')
-  async getUser(@Query() uid: string) {
-    const user = await this.userService.getUser({ uid });
-    return { success: true, message: 'OK', data: user };
-  }
-
   @Get('/wechat/login')
   async login(@Query('code') code: string) {
     const data = await this.userService.webToken(code);
