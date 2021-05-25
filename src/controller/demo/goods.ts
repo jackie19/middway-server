@@ -2,6 +2,7 @@ import { Provide } from '@midwayjs/decorator';
 import { IController } from '../../core/decorator/controller';
 import { DemoAppGoodsEntity } from '../../entity/goods';
 import { APIS } from '../../core/constants/global';
+import { WhereItem } from '../../core/interface/base';
 
 const info = async (ctx, app) => {
   return {
@@ -36,13 +37,17 @@ const info = async (ctx, app) => {
     // ],
     // 筛选条件
     where: async ctx => {
-      const { categoryName, price } = ctx.request.body;
-      return [
+      const { categoryName, price = 0 } = ctx.request.body;
+
+      const result: WhereItem[] = [
         // 价格大于
         ['a.price > :price', { price }],
-        // 查分类
-        ['category.name in (:name)', { name: categoryName }],
       ];
+      // 查分类
+      if (categoryName) {
+        result.push(['category.name in (:name)', { name: categoryName }]);
+      }
+      return result;
     },
   },
 })

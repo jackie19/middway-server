@@ -19,7 +19,7 @@ interface AnyObject {
   [propName: string]: any;
 }
 
-type WhereItem = [string, AnyObject];
+export type WhereItem = [string, Partial<AnyObject>];
 
 interface IWhereFunction {
   (ctx: Context, app: Application): Promise<WhereItem[]>;
