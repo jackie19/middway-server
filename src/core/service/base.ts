@@ -42,10 +42,7 @@ export class BaseService {
       add(param, myEntity);
     }
 
-    await this.entityModel.save(myEntity);
-    return {
-      id: param.id,
-    };
+    return await this.entityModel.save(myEntity);
   }
 
   /**
@@ -67,7 +64,9 @@ export class BaseService {
       update(param, myEntity);
     }
 
-    await this.entityModel.save(param);
+    myEntity.id = parseInt(myEntity.id, 10);
+
+    return await this.entityModel.save(myEntity);
   }
 
   /**
