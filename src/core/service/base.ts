@@ -23,11 +23,6 @@ export class BaseService {
     this.ctx = ctx;
   }
 
-  // 设置应用对象
-  setApp(app) {
-    this.app = app;
-  }
-
   // 初始化
   init() {
     this.sqlParams = [];
@@ -97,8 +92,72 @@ export class BaseService {
     if (!this.entityModel) {
       throw new Error(ERRINFO.NOENTITY);
     }
-    const sql = await this.getOptionFind(query, option);
-    return this.nativeQuery(sql, [], undefined);
+    const builder = await this.builder(query, option);
+    return await builder.getMany();
+  }
+
+  async builder(query, option: Partial<IQueryOption>) {
+    // eslint-disable-next-line prefer-const
+    let { order = 'a.updateTime', sort = 'desc', keyword = '' } = query;
+    const find = await this.entityModel.createQueryBuilder('a');
+    if (option) {
+      if (!_.isEmpty(option.leftJoinAndSelect)) {
+        find.leftJoinAndSelect(...option.leftJoinAndSelect);
+      }
+    }
+    // 默认条件
+    if (option.where) {
+      const wheres = await option.where(this.ctx, this.app);
+      if (!_.isEmpty(wheres)) {
+        for (const item of wheres) {
+          find.andWhere(item[0], item[1]);
+        }
+      }
+    }
+    // 关键字模糊搜索
+    if (keyword) {
+      keyword = `%${keyword}%`;
+      find.andWhere(
+        new Brackets(qb => {
+          const keywordLikeFields = option.keywordLikeFields;
+          for (let i = 0; i < option.keywordLikeFields.length; i++) {
+            qb.orWhere(`${keywordLikeFields[i]} like :keyword`, {
+              keyword,
+            });
+          }
+        })
+      );
+    }
+    // 接口请求的排序
+    if (sort && order) {
+      const sorts = sort.toUpperCase().split(',');
+      const orders = order.split(',');
+      if (sorts.length !== orders.length) {
+        throw new Error('SORT FIELD');
+      }
+      for (const i in sorts) {
+        find.orderBy(orders[i], sorts[i]);
+      }
+    }
+    // 字段全匹配
+    if (!_.isEmpty(option.fieldEq)) {
+      for (const key of option.fieldEq) {
+        const c = {};
+        if (typeof key === 'string') {
+          if (query[key] || query[key] === 0) {
+            c[key] = query[key];
+            const eq = query[key] instanceof Array ? 'in' : '=';
+            if (eq === 'in') {
+              find.andWhere(`a.${key} ${eq} (:${key})`, c);
+            } else {
+              find.andWhere(`a.${key} ${eq} :${key}`, c);
+            }
+          }
+        }
+      }
+    }
+
+    return find;
   }
 
   /**
@@ -210,11 +269,13 @@ export class BaseService {
   }
 
   async getOptionFind(query, option: IQueryOption) {
+    const alias = 'a';
     // eslint-disable-next-line prefer-const
-    let { order = 'a.createTime', sort = 'desc', keyword = '' } = query;
+    let { order = 'createTime', sort = 'desc', keyword = '' } = query;
+    order = `${alias}.${order}`;
     const sqlArr = ['SELECT'];
-    let selects = ['a.*'];
-    const find = this.entityModel.createQueryBuilder('a');
+    let selects = [`${alias}.*`];
+    const find = this.entityModel.createQueryBuilder(alias);
     if (option) {
       if (!_.isEmpty(option.leftJoinAndSelect)) {
         find.leftJoinAndSelect(...option.leftJoinAndSelect);

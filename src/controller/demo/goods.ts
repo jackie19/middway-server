@@ -25,7 +25,7 @@ const info = async (ctx, app) => {
     // 模糊查询
     keywordLikeFields: ['title'],
     // 完全匹配
-    fieldEq: ['type'],
+    fieldEq: ['title'],
     // leftJoin: [
     //   {
     //     entity: DemoAppCategoryEntity,
@@ -35,10 +35,13 @@ const info = async (ctx, app) => {
     //   },
     // ],
     // 筛选条件
-    where: async () => {
+    where: async ctx => {
+      const { categoryName, price } = ctx.request.body;
       return [
-        // 价格大于10
-        ['a.price > :price', { price: 10 }],
+        // 价格大于
+        ['a.price > :price', { price }],
+        // 查分类
+        ['category.name in (:name)', { name: categoryName }],
       ];
     },
   },
