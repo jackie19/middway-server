@@ -30,7 +30,13 @@ export class PageEntity {
   page: number;
 }
 
-export class ListEntity {}
+export class ListEntity {
+  @CreateApiPropertyDoc('keyword', {
+    example: '',
+  })
+  @Rule(RuleType.string())
+  keyword;
+}
 
 export class DeleteEntity {
   @CreateApiPropertyDoc('ids', {
