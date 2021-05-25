@@ -42,8 +42,14 @@ export interface ICrudOptions extends AnyObject {
   queryOption?: Partial<IQueryOption>;
 }
 
+interface IPayload extends AnyObject {
+  content: unknown[];
+  page: number;
+  size: number;
+}
+
 export interface IRes {
   code: RESCODE;
   message: RESMESSAGE;
-  data?: any;
+  payload?: Partial<IPayload>;
 }

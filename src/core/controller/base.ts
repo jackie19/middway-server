@@ -19,7 +19,7 @@ export abstract class BaseController {
       message: RESMESSAGE.SUCCESS,
     };
     if (data) {
-      res.data = data;
+      res.payload = { content: data };
     }
     return res;
   }
