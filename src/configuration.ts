@@ -32,17 +32,18 @@ import { APIS, Method } from './core/constants/global';
 
 function getMetadataValue(url, entity) {
   switch (url) {
-    case 'add':
+    case APIS.SCHEMA:
+    case APIS.ADD:
       return [entity, String];
-    case 'delete':
+    case APIS.DELETE:
       return [DeleteEntity, String];
-    case 'list':
+    case APIS.LIST:
       return [ListEntity, String];
-    case 'page':
+    case APIS.PAGE:
       return [PageEntity, String];
-    case 'update':
+    case APIS.UPDATE:
       return [entity, String, String];
-    case 'info':
+    case APIS.INFO:
       return [String, String, String];
   }
 }
@@ -347,10 +348,10 @@ export class ContainerLifeCycle extends BaseController implements ILifeCycle {
               ctx.status = 200;
               try {
                 switch (url) {
-                  case 'add':
+                  case APIS.ADD:
                     this.validateParams(entity, requestParams, url);
                     break;
-                  case 'update':
+                  case APIS.UPDATE:
                     requestParams.id = ctx.request.query.id;
                     this.validateParams(entity, requestParams, url);
                     break;
