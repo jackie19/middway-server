@@ -20,21 +20,11 @@ const info = async (ctx, app) => {
   entity: DemoAppGoodsEntity,
   info,
   queryOption: {
-    // 增加 sql select
-    select: ['category.name as category_name', 'category.id as category_id'],
     leftJoinAndSelect: ['a.category', 'category'],
     // 模糊查询
     keywordLikeFields: ['title'],
     // 完全匹配
     fieldEq: ['title'],
-    // leftJoin: [
-    //   {
-    //     entity: DemoAppCategoryEntity,
-    //     alias: 'b',
-    //     selects: ['b.name'],
-    //     condition: 'a.memberId = b.id',
-    //   },
-    // ],
     // 筛选条件
     where: async ctx => {
       const { categoryName, price = 0 } = ctx.request.body;
