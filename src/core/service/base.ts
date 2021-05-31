@@ -1,10 +1,36 @@
-import { Provide, App } from '@midwayjs/decorator';
+import {
+  Provide,
+  App,
+  getClassMetadata,
+  getPropertyMetadata,
+  RULES_KEY,
+} from '@midwayjs/decorator';
+import { SWAGGER_DOCUMENT_KEY } from '@midwayjs/swagger';
+import { SwaggerDefinition } from '@midwayjs/swagger/dist/lib/document';
 import { Application } from 'egg';
 import * as _ from 'lodash';
 import { Brackets, Repository } from 'typeorm';
 import { ERRINFO } from '../constants/global';
 import { IQueryOption } from '../interface/base';
 
+function convertJoiSchemaType(joiSchema) {
+  if (joiSchema.type === 'array') {
+    return {
+      type: joiSchema.type,
+      items: convertJoiSchemaType(joiSchema['$_terms'].items[0]),
+    };
+  }
+  return {
+    type: joiSchema.type,
+  };
+}
+function mixWhenPropertyEmpty(target, source) {
+  for (const key in source) {
+    if (!target[key] && source[key]) {
+      target[key] = source[key];
+    }
+  }
+}
 @Provide()
 export class BaseService {
   @App()
@@ -43,6 +69,49 @@ export class BaseService {
     }
 
     return await this.entityModel.save(myEntity);
+  }
+
+  async schema(param, { entity }) {
+    const properties = getClassMetadata(SWAGGER_DOCUMENT_KEY, entity);
+    const swaggerDefinition = new SwaggerDefinition();
+    swaggerDefinition.name = entity.name;
+    swaggerDefinition.type = 'object';
+    for (const propertyName in properties) {
+      if (Object.prototype.hasOwnProperty.call(properties, propertyName)) {
+        swaggerDefinition.properties[propertyName] = {
+          type: properties[propertyName].type,
+          description: properties[propertyName].description,
+          example: properties[propertyName].example,
+        };
+      }
+    }
+    const rules = getClassMetadata(RULES_KEY, entity);
+    if (rules) {
+      const properties = Object.keys(rules);
+      for (const property of properties) {
+        // set required
+        if (rules[property]?._flags?.presence === 'required') {
+          swaggerDefinition.required.push(property);
+        }
+        // get property description
+        let propertyInfo = getPropertyMetadata(
+          SWAGGER_DOCUMENT_KEY,
+          entity,
+          property
+        );
+        if (!propertyInfo) {
+          propertyInfo = convertJoiSchemaType(rules[property]);
+        }
+        swaggerDefinition.properties[property] =
+          swaggerDefinition.properties[property] || {};
+        mixWhenPropertyEmpty(
+          swaggerDefinition.properties[property],
+          propertyInfo
+        );
+      }
+    }
+
+    return properties;
   }
 
   /**

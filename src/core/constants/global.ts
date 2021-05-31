@@ -10,6 +10,7 @@ export enum APIS {
   INFO = 'info',
   LIST = 'list',
   PAGE = 'page',
+  SCHEMA = 'schema',
 }
 
 /**

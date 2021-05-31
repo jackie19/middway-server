@@ -32,7 +32,6 @@ import { APIS, Method } from './core/constants/global';
 
 function getMetadataValue(url, entity) {
   switch (url) {
-    case APIS.SCHEMA:
     case APIS.ADD:
       return [entity, String];
     case APIS.DELETE:
@@ -44,6 +43,7 @@ function getMetadataValue(url, entity) {
     case APIS.UPDATE:
       return [entity, String, String];
     case APIS.INFO:
+    case APIS.SCHEMA:
       return [String, String, String];
   }
 }
@@ -309,7 +309,8 @@ export class ContainerLifeCycle extends BaseController implements ILifeCycle {
         const middleware = await this.getMiddleware(routerOptions.middleware);
 
         for (const url of api) {
-          const method = url === APIS.INFO ? Method.get : Method.post;
+          const method =
+            url === APIS.INFO || url === APIS.SCHEMA ? Method.get : Method.post;
           const path = joinURLPath(prefix, url);
           this.coreLogger.info(
             `\x1B[36m[configuration] crud add:  \x1B[0m ${path}`
