@@ -19,6 +19,14 @@ export class DemoSchemaEntity {
   @Rule(RuleType.array().items('GET', 'POST', 'DELETE', 'PUT'))
   method: string;
 
+  @CreateApiPropertyDoc('自定义', { example: '' })
+  @Rule(RuleType.any().allow('el-input'))
+  custom: any;
+
+  @CreateApiPropertyDoc('布尔', { example: false })
+  @Rule(RuleType.boolean())
+  bool: boolean;
+
   @CreateApiPropertyDoc('分类', {
     description: '产品分类',
     example: [{ id: 1, name: 'electron' }],

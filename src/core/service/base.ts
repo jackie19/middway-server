@@ -89,33 +89,40 @@ export class BaseService {
     if (rules) {
       const ruleKeys = Object.keys(rules);
       for (const property of ruleKeys) {
-        properties[property].type = rules[property].type;
-        if (Array.isArray(rules[property]?._rules)) {
-          rules[property]?._rules.forEach(rule => {
+        const describe = rules[property].describe();
+        properties[property].type = describe.type;
+        if (Array.isArray(describe?.rules)) {
+          describe.rules.forEach(rule => {
             if (rule.name === 'max') {
               properties[property].max = rule.args.limit;
             }
             if (rule.name === 'min') {
               properties[property].min = rule.args.limit;
             }
-            if (rule.name === 'items') {
-              properties[property].elements =
-                properties[property].elements || {};
-              properties[property].elements.one_of = rules[
-                property
-              ].$_terms.items
-                .map(item => {
-                  const values = item?._valids?._values;
-                  return values && Array.from(item?._valids?._values);
-                })
-                .flat()
-                .filter(i => !!i);
-              properties[property].elements.type = 'string';
-            }
           });
         }
+
+        // 数组类型的 items
+        if (Array.isArray(describe.items)) {
+          properties[property].elements = properties[property].elements || {};
+          properties[property].elements.one_of = describe.items
+            .map(i => i.allow)
+            .flat()
+            .filter(i => typeof i === 'string');
+          properties[property].elements.type = 'string';
+        }
+
+        if (describe.example) {
+          properties[property].example = describe.example;
+        }
+
+        // custom component
+        if (describe.type === 'any') {
+          properties[property].component = describe.allow[0];
+        }
+
         // set required
-        if (rules[property]?._flags?.presence === 'required') {
+        if (describe?.flags?.presence === 'required') {
           swaggerDefinition.required.push(property);
           properties[property].required = true;
         }
