@@ -98,6 +98,20 @@ export class BaseService {
             if (rule.name === 'min') {
               properties[property].min = rule.args.limit;
             }
+            if (rule.name === 'items') {
+              properties[property].elements =
+                properties[property].elements || {};
+              properties[property].elements.one_of = rules[
+                property
+              ].$_terms.items
+                .map(item => {
+                  const values = item?._valids?._values;
+                  return values && Array.from(item?._valids?._values);
+                })
+                .flat()
+                .filter(i => !!i);
+              properties[property].elements.type = 'string';
+            }
           });
         }
         // set required
