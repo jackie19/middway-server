@@ -1,6 +1,6 @@
-export enum Method {
-  post = 'post',
-  get = 'get',
+export enum Methods {
+  POST = 'post',
+  GET = 'get',
 }
 
 export enum APIS {

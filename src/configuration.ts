@@ -28,11 +28,12 @@ import * as Joi from 'joi';
 import { BaseService } from './core/service/base';
 import { BaseController } from './core/controller/base';
 import { DeleteEntity, ListEntity, PageEntity } from './core/entity/base';
-import { APIS, Method } from './core/constants/global';
+import { APIS, Methods } from './core/constants/global';
 
 function getMetadataValue(url, entity) {
   switch (url) {
     case APIS.ADD:
+    case APIS.SCHEMA:
       return [entity, String];
     case APIS.DELETE:
       return [DeleteEntity, String];
@@ -43,7 +44,6 @@ function getMetadataValue(url, entity) {
     case APIS.UPDATE:
       return [entity, String, String];
     case APIS.INFO:
-    case APIS.SCHEMA:
       return [String, String, String];
   }
 }
@@ -230,7 +230,7 @@ export class ContainerLifeCycle extends BaseController implements ILifeCycle {
   }
 
   postApiAddBody(method, crudModule, propertyName) {
-    if (method === Method.post) {
+    if (method === Methods.POST) {
       this.attachPropertyDataToClass({
         data: {
           index: 0,
@@ -304,13 +304,20 @@ export class ContainerLifeCycle extends BaseController implements ILifeCycle {
       const { entity } = crudOptions;
 
       if (entity) {
-        const entityModel = orm.useEntityModel(entity);
+        let entityModel;
+        try {
+          entityModel = orm.useEntityModel(entity);
+        } catch (e) {
+          console.log('no orm entity.');
+        }
         const { api = [], insertParam, service } = crudOptions;
         const middleware = await this.getMiddleware(routerOptions.middleware);
 
         for (const url of api) {
           const method =
-            url === APIS.INFO || url === APIS.SCHEMA ? Method.get : Method.post;
+            url === APIS.INFO || url === APIS.SCHEMA
+              ? Methods.GET
+              : Methods.POST;
           const path = joinURLPath(prefix, url);
           this.coreLogger.info(
             `\x1B[36m[configuration] crud add:  \x1B[0m ${path}`
@@ -333,7 +340,7 @@ export class ContainerLifeCycle extends BaseController implements ILifeCycle {
               const baseService = (await ctx.requestContext.getAsync(
                 service ? service : BaseService
               )) as BaseService;
-              baseService.setEntityModel(entityModel);
+              entityModel && baseService.setEntityModel(entityModel);
               baseService.setCtx(ctx);
               const requestParams =
                 ctx.req.method === 'GET'

@@ -13,7 +13,7 @@ export class DemoAppGoodsEntity extends BaseEntity {
   @CreateApiPropertyDoc('标题', {
     example: '华为荣耀',
   })
-  @Rule(RuleType.string().required().max(10))
+  @Rule(RuleType.string().required().max(10).min(1))
   @Column({ comment: '标题' })
   title: string;
 
@@ -32,7 +32,14 @@ export class DemoAppGoodsEntity extends BaseEntity {
     example: [{ id: 1, name: 'electron' }],
   })
   // 配合 CreateApiPropertyDoc 生成文档
-  @Rule(RuleType.array().items(RuleType.object()))
+  @Rule(
+    RuleType.array().items(
+      RuleType.object({
+        id: RuleType.number,
+        name: RuleType.string,
+      })
+    )
+  )
   @ManyToMany(() => DemoAppCategoryEntity, category => category.goods, {
     cascade: true,
   })

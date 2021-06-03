@@ -81,17 +81,29 @@ export class BaseService {
         swaggerDefinition.properties[propertyName] = {
           type: properties[propertyName].type,
           description: properties[propertyName].description,
-          example: properties[propertyName].example,
+          default: properties[propertyName].example,
         };
       }
     }
     const rules = getClassMetadata(RULES_KEY, entity);
     if (rules) {
-      const properties = Object.keys(rules);
-      for (const property of properties) {
+      const ruleKeys = Object.keys(rules);
+      for (const property of ruleKeys) {
+        properties[property].type = rules[property].type;
+        if (Array.isArray(rules[property]?._rules)) {
+          rules[property]?._rules.forEach(rule => {
+            if (rule.name === 'max') {
+              properties[property].max = rule.args.limit;
+            }
+            if (rule.name === 'min') {
+              properties[property].min = rule.args.limit;
+            }
+          });
+        }
         // set required
         if (rules[property]?._flags?.presence === 'required') {
           swaggerDefinition.required.push(property);
+          properties[property].required = true;
         }
         // get property description
         let propertyInfo = getPropertyMetadata(

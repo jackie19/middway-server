@@ -48,6 +48,9 @@ $ npm stop
 ### todo
 - oss 文件上传签名
 - 实体导出 schema 接口
+    - 自定义组件
+    - 联动 - 自定义组件实现
+    - select options 数据
 - 微信支付
 - core 组件
 
