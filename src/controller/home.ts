@@ -7,7 +7,8 @@ import { CreateApiDoc } from '@midwayjs/swagger';
 export class HomeController extends BaseController {
   @Get('/')
   async home() {
-    return this.app.config[this.app.config.nacos.dataId];
+    const { nacos } = this.app.config;
+    return this.app.config[nacos?.dataId];
   }
 
   @(CreateApiDoc().build())

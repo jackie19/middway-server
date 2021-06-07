@@ -21,7 +21,11 @@ class Agent {
   }
 
   async nacos() {
-    const { serverAddr, dataId, group } = this.app.config.nacos;
+    const { nacos } = this.app.config;
+    if (!nacos) {
+      return;
+    }
+    const { serverAddr, dataId, group } = nacos;
     const configClient = new NacosConfigClient({
       serverAddr,
     });
@@ -47,6 +51,10 @@ class Agent {
   }
 
   async getAccessToken() {
+    const { wx } = this.app.config;
+    if (!wx) {
+      return;
+    }
     const access_token = cache.get('access_token');
 
     if (access_token) {
@@ -54,8 +62,7 @@ class Agent {
       return access_token;
     }
 
-    const appID = this.app.config.wx.appID;
-    const appsecret = this.app.config.wx.appsecret;
+    const { appID, appsecret } = wx;
     const api = wechatApi.accessToken;
     const url = api + '&appid=' + appID + '&secret=' + appsecret;
     const { data } = await this.app.curl(url, { dataType: 'json' });
@@ -72,6 +79,11 @@ class Agent {
   }
 
   async getTicket() {
+    const { wx } = this.app.config;
+    if (!wx) {
+      return;
+    }
+
     const ticket = cache.get('ticket');
     if (ticket) {
       this.sendToApp('ticket', ticket);

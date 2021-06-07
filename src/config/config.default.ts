@@ -23,8 +23,6 @@ export default appInfo => {
     },
   };
 
-  config.wx = {};
-
   // 全局路由前缀
   config.routerPrefix = 'api';
 
