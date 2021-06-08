@@ -1,44 +1,18 @@
-import {
-  Provide,
-  App,
-  getClassMetadata,
-  getPropertyMetadata,
-  RULES_KEY,
-} from '@midwayjs/decorator';
-import { SWAGGER_DOCUMENT_KEY } from '@midwayjs/swagger';
-import { SwaggerDefinition } from '@midwayjs/swagger/dist/lib/document';
+import { Provide, App } from '@midwayjs/decorator';
 import { Application } from 'egg';
 import * as _ from 'lodash';
 import { Brackets, Repository } from 'typeorm';
 import { ERRINFO } from '../constants/global';
 import { IQueryOption } from '../interface/base';
+import { SchemaService } from './schema';
 
-function convertJoiSchemaType(joiSchema) {
-  if (joiSchema.type === 'array') {
-    return {
-      type: joiSchema.type,
-      items: convertJoiSchemaType(joiSchema['$_terms'].items[0]),
-    };
-  }
-  return {
-    type: joiSchema.type,
-  };
-}
-function mixWhenPropertyEmpty(target, source) {
-  for (const key in source) {
-    if (!target[key] && source[key]) {
-      target[key] = source[key];
-    }
-  }
-}
 @Provide()
-export class BaseService {
+export class BaseService extends SchemaService {
   @App()
   app: Application;
 
   entityModel: Repository<any>;
   ctx = null;
-  sqlParams = [];
 
   setEntityModel(entityModel) {
     this.entityModel = entityModel;
@@ -47,11 +21,6 @@ export class BaseService {
   // 设置请求上下文
   setCtx(ctx) {
     this.ctx = ctx;
-  }
-
-  // 初始化
-  init() {
-    this.sqlParams = [];
   }
 
   async add(param, { entity, add }) {
@@ -69,82 +38,6 @@ export class BaseService {
     }
 
     return await this.entityModel.save(myEntity);
-  }
-
-  async schema(param, { entity }) {
-    const properties = getClassMetadata(SWAGGER_DOCUMENT_KEY, entity);
-    const swaggerDefinition = new SwaggerDefinition();
-    swaggerDefinition.name = entity.name;
-    swaggerDefinition.type = 'object';
-    for (const propertyName in properties) {
-      if (Object.prototype.hasOwnProperty.call(properties, propertyName)) {
-        swaggerDefinition.properties[propertyName] = {
-          type: properties[propertyName].type,
-          description: properties[propertyName].description,
-          default: properties[propertyName].example,
-        };
-      }
-    }
-    const rules = getClassMetadata(RULES_KEY, entity);
-    if (rules) {
-      const ruleKeys = Object.keys(rules);
-      for (const property of ruleKeys) {
-        const describe = rules[property].describe();
-        properties[property].type = describe.type;
-        if (Array.isArray(describe?.rules)) {
-          describe.rules.forEach(rule => {
-            if (rule.name === 'max') {
-              properties[property].max = rule.args.limit;
-            }
-            if (rule.name === 'min') {
-              properties[property].min = rule.args.limit;
-            }
-          });
-        }
-
-        // 数组类型的 items
-        if (Array.isArray(describe.items)) {
-          properties[property].elements = properties[property].elements || {};
-          properties[property].elements.one_of = describe.items
-            .map(i => i.allow)
-            .flat()
-            .filter(i => typeof i === 'string');
-          properties[property].elements.type = 'string';
-        }
-
-        if (describe.example) {
-          properties[property].example = describe.example;
-        }
-
-        // custom component
-        if (describe.type === 'any') {
-          properties[property].component = describe.allow[0];
-        }
-
-        // set required
-        if (describe?.flags?.presence === 'required') {
-          swaggerDefinition.required.push(property);
-          properties[property].required = true;
-        }
-        // get property description
-        let propertyInfo = getPropertyMetadata(
-          SWAGGER_DOCUMENT_KEY,
-          entity,
-          property
-        );
-        if (!propertyInfo) {
-          propertyInfo = convertJoiSchemaType(rules[property]);
-        }
-        swaggerDefinition.properties[property] =
-          swaggerDefinition.properties[property] || {};
-        mixWhenPropertyEmpty(
-          swaggerDefinition.properties[property],
-          propertyInfo
-        );
-      }
-    }
-
-    return properties;
   }
 
   /**
