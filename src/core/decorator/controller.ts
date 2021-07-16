@@ -11,6 +11,8 @@ import { ICrudOptions } from '../interface/base';
 
 import config from '../../config/config.default';
 
+export const { routerPrefix } = config({});
+
 // todo 获取 config
 export function IController(
   prefix = '/',
@@ -22,7 +24,7 @@ export function IController(
     saveClassMetadata(
       CONTROLLER_KEY,
       {
-        prefix: joinURLPath(config({}).routerPrefix, prefix),
+        prefix: joinURLPath(routerPrefix, prefix),
         routerOptions: {
           tagName: target.name,
           ...routerOptions,
